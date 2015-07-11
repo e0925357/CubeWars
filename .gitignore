@@ -7,6 +7,7 @@
 /Build
 
 *.sdf
+*.sln
 *.opensdf
 *.dia~
 *.blend1
