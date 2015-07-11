@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "4.8",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "CubeWars",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
