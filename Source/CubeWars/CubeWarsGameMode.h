@@ -12,8 +12,8 @@ UCLASS()
 class CUBEWARS_API ACubeWarsGameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
-	
+
+		ACubeWarsGameMode();
 	
 	
 };

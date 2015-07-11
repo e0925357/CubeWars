@@ -2,7 +2,13 @@
 
 #include "CubeWars.h"
 #include "CubeWarsGameMode.h"
+#include "PlayerCube.h"
+#include "PlayerCubeController.h"
 
 
-
+ACubeWarsGameMode::ACubeWarsGameMode()
+{
+	DefaultPawnClass = APlayerCube::StaticClass();
+	PlayerControllerClass = APlayerController::StaticClass();
+}
 
