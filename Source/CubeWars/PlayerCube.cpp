@@ -116,12 +116,18 @@ void APlayerCube::Turn(float value)
 		//GetWorld()->GetDeltaSeconds()
 		FRotator Rotation = GetActorRotation();
 		Rotation.Yaw += TurnRate*GetWorld()->GetDeltaSeconds()*value;
+		float yaw = Rotation.Yaw;
 
-		if(Rotation.Yaw - InitinalRotation.Yaw + 45.0f < 0.0f)
+		if(InitinalRotation.Yaw < -90.0f && yaw > 90.0f)
+		{
+			yaw -= 360.0f;
+		}
+
+		if(yaw - InitinalRotation.Yaw + 45.0f < 0.0f)
 		{
 			Rotation.Yaw = InitinalRotation.Yaw - 45.0f;
 		}
-		else if(Rotation.Yaw - InitinalRotation.Yaw - 45.0f > 0.0f)
+		else if(yaw - InitinalRotation.Yaw - 45.0f > 0.0f)
 		{
 			Rotation.Yaw = InitinalRotation.Yaw + 45.0f;
 		}
