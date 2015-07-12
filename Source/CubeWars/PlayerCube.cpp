@@ -10,21 +10,55 @@ APlayerCube::APlayerCube()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	WarCubeComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("WarCube"));
-	WarCubeComponent->SetCollisionProfileName(TEXT("Pawn"));
-	WarCubeComponent->SetLockedAxis(EDOFMode::XZPlane);
-	WarCubeComponent->InitBoxExtent(FVector(2, 2, 2));
+	//Create the collision as our root component
+	CubeCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionCube"));
+	CubeCollisionComponent->SetCollisionProfileName(TEXT("Pawn"));
+	CubeCollisionComponent->SetLockedAxis(EDOFMode::YZPlane);
+	CubeCollisionComponent->InitBoxExtent(FVector(50, 50, 50));
+	CubeCollisionComponent->SetSimulatePhysics(true);
+	RootComponent = CubeCollisionComponent;
 
-	static ConstructorHelpers::FObjectFinder<UMaterialInstance> Material(TEXT("MaterialInstance'/Game/Materials/Quadratic.Quadratic'"));
-
-	if(Material.Object != NULL)
+	// Create and position a mesh component so we can see where our cube is
+	CubeVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
+	CubeVisual->AttachTo(RootComponent);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/Meshes/SimpleCube.SimpleCube"));
+	if(SphereVisualAsset.Succeeded())
 	{
-		UMaterialInstance* mat = (UMaterialInstance*)Material.Object;
+		CubeVisual->SetStaticMesh(SphereVisualAsset.Object);
+		//CubeVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
+		CubeVisual->SetWorldScale3D(FVector(5.0f));
 
-		WarCubeComponent->SetMaterial(0, mat);
+		static ConstructorHelpers::FObjectFinder<UMaterialInstance> Material(TEXT("/Game/Materials/Quadratic.Quadratic"));
+
+		if(Material.Succeeded())
+		{
+			UMaterialInstance* mat = (UMaterialInstance*)Material.Object;
+			
+			CubeVisual->SetMaterial(0, mat);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Materials/Quadratic.Quadratic'!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Meshes/SimpleCube.SimpleCube'!"));
 	}
 
-	RootComponent = WarCubeComponent;
+	// Use a spring arm to give the camera smooth, natural-feeling motion.
+	USpringArmComponent* SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraAttachmentArm"));
+	SpringArm->AttachTo(RootComponent);
+	SpringArm->RelativeRotation = FRotator(-45.f, 0.f, 0.f);
+	SpringArm->TargetArmLength = 400.0f;
+	SpringArm->bEnableCameraLag = true;
+	SpringArm->CameraLagSpeed = 3.0f;
+
+	SpringArm->AttachTo(RootComponent);
+
+	// Create a camera and attach to our spring arm
+	UCameraComponent* Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ActualCamera"));
+	Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);
 }
 
 // Called when the game starts or when spawned
@@ -58,7 +92,12 @@ void APlayerCube::MoveHorizontal(float value)
 {
 	if(value != 0)
 	{
-		static const FVector RightVector(1, 0, 0);
+		//Get right vector
+		FVector RightVector(1, 0, 0);
+		FRotator Rotation = GetActorRotation();
+		RightVector = Rotation.RotateVector(RightVector);
+
+		//Delegate movement to the MovementComponent
 		AddMovementInput(RightVector, value);
 	}
 }

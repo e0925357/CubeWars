@@ -31,6 +31,10 @@ protected:
 
 	void OnStopFire();
 
-	UBoxComponent* WarCubeComponent;
+	UPROPERTY(VisibleAnywhere, Category = Components)
+	UBoxComponent* CubeCollisionComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = Components)
+	UStaticMeshComponent* CubeVisual;
 	
 };
