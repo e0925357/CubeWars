@@ -23,6 +23,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
+	// Return custom movement
+	virtual UPawnMovementComponent* GetMovementComponent() const override;
+
 protected:
 
 	void MoveHorizontal(float value);
@@ -36,5 +39,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = Components)
 	UStaticMeshComponent* CubeVisual;
+
+	UPROPERTY(VisibleAnywhere, Category = Components)
+	class UPlayerCubeMovementComponent* CubeMovement;
 	
 };

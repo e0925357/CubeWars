@@ -2,6 +2,7 @@
 
 #include "CubeWars.h"
 #include "PlayerCube.h"
+#include "PlayerCubeMovementComponent.h"
 
 
 // Sets default values
@@ -13,7 +14,7 @@ APlayerCube::APlayerCube()
 	//Create the collision as our root component
 	CubeCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionCube"));
 	CubeCollisionComponent->SetCollisionProfileName(TEXT("Pawn"));
-	CubeCollisionComponent->SetLockedAxis(EDOFMode::YZPlane);
+	//CubeCollisionComponent->SetLockedAxis(EDOFMode::YZPlane);
 	CubeCollisionComponent->InitBoxExtent(FVector(50, 50, 50));
 	CubeCollisionComponent->SetSimulatePhysics(true);
 	RootComponent = CubeCollisionComponent;
@@ -59,6 +60,9 @@ APlayerCube::APlayerCube()
 	// Create a camera and attach to our spring arm
 	UCameraComponent* Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ActualCamera"));
 	Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);
+
+	CubeMovement = CreateDefaultSubobject<UPlayerCubeMovementComponent>(TEXT("CubeMovement"));
+	CubeMovement->UpdatedComponent = RootComponent;
 }
 
 // Called when the game starts or when spawned
@@ -110,4 +114,9 @@ void APlayerCube::OnStartFire()
 void APlayerCube::OnStopFire()
 {
 
+}
+
+UPawnMovementComponent* APlayerCube::GetMovementComponent() const
+{
+	return CubeMovement;
 }
