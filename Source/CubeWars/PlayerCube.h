@@ -28,6 +28,7 @@ public:
 
 protected:
 
+	UFUNCTION(Server, WithValidation, unreliable)
 	void MoveHorizontal(float value);
 
 	void OnStartFire();

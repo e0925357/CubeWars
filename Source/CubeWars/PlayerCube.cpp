@@ -89,7 +89,12 @@ void APlayerCube::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	InputComponent->BindAction("Fire", IE_Released, this, &APlayerCube::OnStopFire);
 }
 
-void APlayerCube::MoveHorizontal(float value)
+bool APlayerCube::MoveHorizontal_Validate(float value)
+{
+	return true;
+}
+
+void APlayerCube::MoveHorizontal_Implementation(float value)
 {
 	if(value != 0)
 	{
