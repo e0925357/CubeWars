@@ -11,17 +11,12 @@ APlayerCube::APlayerCube()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//Create the collision as our root component
-	CubeCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionCube"));
-	CubeCollisionComponent->SetCollisionProfileName(TEXT("Pawn"));
-	//CubeCollisionComponent->SetLockedAxis(EDOFMode::YZPlane);
-	CubeCollisionComponent->InitBoxExtent(FVector(50, 50, 50));
-	CubeCollisionComponent->SetSimulatePhysics(true);
-	RootComponent = CubeCollisionComponent;
-
 	// Create and position a mesh component so we can see where our cube is
 	CubeVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
-	CubeVisual->AttachTo(RootComponent);
+	CubeVisual->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CubeVisual->SetCollisionProfileName(TEXT("Pawn"));
+	CubeVisual->SetSimulatePhysics(true);
+
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/Meshes/SimpleCube.SimpleCube"));
 	if(SphereVisualAsset.Succeeded())
 	{
@@ -46,6 +41,8 @@ APlayerCube::APlayerCube()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Meshes/SimpleCube.SimpleCube'!"));
 	}
+
+	RootComponent = CubeVisual;
 
 	// Use a spring arm to give the camera smooth, natural-feeling motion.
 	USpringArmComponent* SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraAttachmentArm"));
@@ -97,12 +94,12 @@ void APlayerCube::MoveHorizontal(float value)
 	if(value != 0)
 	{
 		//Get right vector
-		FVector RightVector(1, 0, 0);
+		FVector RightVector(0, 1, 0);
 		FRotator Rotation = GetActorRotation();
 		RightVector = Rotation.RotateVector(RightVector);
 
 		//Delegate movement to the MovementComponent
-		AddMovementInput(RightVector, value);
+		CubeMovement->AddInputVector(RightVector * value);
 	}
 }
 
