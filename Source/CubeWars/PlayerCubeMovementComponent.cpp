@@ -4,6 +4,10 @@
 #include "PlayerCubeMovementComponent.h"
 
 
+UPlayerCubeMovementComponent::UPlayerCubeMovementComponent() : Speed(150.0f)
+{
+
+}
 
 void UPlayerCubeMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
@@ -16,16 +20,20 @@ void UPlayerCubeMovementComponent::TickComponent(float DeltaTime, enum ELevelTic
 	}
 
 	// Get (and then clear) the movement vector that we set in ACollidingPawn::Tick
-	FVector DesiredMovementThisFrame = ConsumeInputVector().GetClampedToMaxSize(1.0f) * DeltaTime * 150.0f;
+	FVector DesiredMovementThisFrame = ConsumeInputVector().GetClampedToMaxSize(1.0f) * DeltaTime * Speed;
 	if(!DesiredMovementThisFrame.IsNearlyZero())
 	{
 		FHitResult Hit;
 		SafeMoveUpdatedComponent(DesiredMovementThisFrame, UpdatedComponent->GetComponentRotation(), true, Hit);
-
-		// If we bumped into something, try to slide along it
-		if(Hit.IsValidBlockingHit())
-		{
-			SlideAlongSurface(DesiredMovementThisFrame, 1.f - Hit.Time, Hit.Normal, Hit);
-		}
 	}
 };
+
+void UPlayerCubeMovementComponent::SetSpeed(float speed)
+{
+	Speed = speed;
+}
+
+float UPlayerCubeMovementComponent::GetSpeed()
+{
+	return Speed;
+}
