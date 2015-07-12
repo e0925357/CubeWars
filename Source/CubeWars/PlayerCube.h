@@ -30,9 +30,16 @@ protected:
 
 	void MoveHorizontal(float value);
 
+	void Turn(float value);
+
 	void OnStartFire();
 
 	void OnStopFire();
+
+	FRotator InitinalRotation;
+
+	UPROPERTY(EditAnywhere, Category = Stats)
+	float TurnRate;
 
 	UPROPERTY(VisibleAnywhere, Category = Components)
 	UBoxComponent* CubeCollisionComponent;
