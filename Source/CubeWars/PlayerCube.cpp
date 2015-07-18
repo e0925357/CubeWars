@@ -6,7 +6,7 @@
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
-APlayerCube::APlayerCube() : TurnRate(20.0f)
+APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -106,6 +106,25 @@ void APlayerCube::Tick( float DeltaTime )
 	}
 }
 
+float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if(Health <= 0)
+	{
+		return 0;
+	}
+
+	Health -= DamageAmount;
+
+	if(Health <= 0)
+	{
+		//TODO: Handle player death
+	}
+
+	return DamageAmount;
+}
+
 // Called to bind functionality to input
 void APlayerCube::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
@@ -120,7 +139,7 @@ void APlayerCube::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 void APlayerCube::MoveHorizontal(float value)
 {
-	if(value != 0 && IsLocallyControlled())
+	if(value != 0 && IsLocallyControlled() && Health > 0)
 	{
 		//Predict movement and notify server
 		//Get right vector
@@ -142,12 +161,12 @@ void APlayerCube::MoveHorizontal(float value)
 
 bool APlayerCube::MoveHorizontalServer_Validate(float value)
 {
-	return true;
+	return  Health > 0;
 }
 
 void APlayerCube::MoveHorizontalServer_Implementation(float value)
 {
-	if(value != 0 && Role == ROLE_Authority)
+	if(value != 0 && Role == ROLE_Authority && Health > 0)
 	{
 		//Get right vector
 		FVector RightVector(0, 1, 0);
@@ -162,12 +181,12 @@ void APlayerCube::MoveHorizontalServer_Implementation(float value)
 
 bool APlayerCube::Turn_Validate(float value)
 {
-	return true;
+	return Health > 0;
 }
 
 void APlayerCube::Turn_Implementation(float value)
 {
-	if(value != 0 && Role == ROLE_Authority)
+	if(value != 0 && Role == ROLE_Authority && Health > 0)
 	{
 		//GetWorld()->GetDeltaSeconds()
 		FRotator Rotation = GetActorRotation();

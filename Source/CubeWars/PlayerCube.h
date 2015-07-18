@@ -26,8 +26,17 @@ public:
 	// Return custom movement
 	virtual UPawnMovementComponent* GetMovementComponent() const override;
 
+	//If the actor takes damage
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser);
+
 protected:
 
+	UPROPERTY(Replicated, VisibleAnywhere, Category = Stats)
+	float Health;
+
+	//---------------------------------------------------------------------------------------------
+	// Movement
+	//---------------------------------------------------------------------------------------------
 	void MoveHorizontal(float value);
 
 	UFUNCTION(Server, WithValidation, unreliable)
@@ -57,13 +66,15 @@ protected:
 	UFUNCTION()
 	void OnRep_RotChange();
 
-	UPROPERTY(VisibleAnywhere, Category = Components)
-	UBoxComponent* CubeCollisionComponent;
+	UPROPERTY(Replicated, VisibleAnywhere, Category = Components)
+	class UPlayerCubeMovementComponent* CubeMovement;
+
+
+	//---------------------------------------------------------------------------------------------
+	// Components & Visuals
+	//---------------------------------------------------------------------------------------------
 
 	UPROPERTY(VisibleAnywhere, Category = Components)
 	UStaticMeshComponent* CubeVisual;
-
-	UPROPERTY(Replicated, VisibleAnywhere, Category = Components)
-	class UPlayerCubeMovementComponent* CubeMovement;
 	
 };
