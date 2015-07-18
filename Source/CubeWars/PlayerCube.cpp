@@ -11,7 +11,6 @@ APlayerCube::APlayerCube() : TurnRate(20.0f)
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
-	bReplicateMovement = true;
 
 	// Create and position a mesh component so we can see where our cube is
 	CubeVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
@@ -77,6 +76,34 @@ void APlayerCube::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
+	if(Role == ROLE_Authority || IsLocallyControlled())
+	{
+		//Move locally(prediction) and at the server
+		CubeMovement->move(DeltaTime);
+
+		if(Role == ROLE_Authority)
+		{
+			//Distribute the current values to the clients
+			CurrentPosition = GetActorLocation();
+			CurrentRotation = GetActorRotation();
+		}
+	}
+
+	if(IsLocallyControlled() && Role != ROLE_Authority)
+	{
+		//Perform prediction correction
+		//Are we too far apart?
+		FVector Diff = CurrentPosition - GetActorLocation();
+
+		if(Diff.SizeSquared() > 100.0f)
+		{
+			//sweep to server location at 110% speed
+			FVector CorrectionVector = Diff;
+			CorrectionVector.Normalize();
+			CorrectionVector *= CubeMovement->GetSpeed()*1.1f*DeltaTime;
+			SetActorLocation(GetActorLocation() + CorrectionVector);
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -91,14 +118,36 @@ void APlayerCube::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	InputComponent->BindAction("Fire", IE_Released, this, &APlayerCube::OnStopFire);
 }
 
-bool APlayerCube::MoveHorizontal_Validate(float value)
+void APlayerCube::MoveHorizontal(float value)
+{
+	if(value != 0 && IsLocallyControlled())
+	{
+		//Predict movement and notify server
+		//Get right vector
+		FVector RightVector(0, 1, 0);
+		RightVector = InitinalRotation.RotateVector(RightVector);
+
+
+
+		//Delegate movement to the MovementComponent
+		CubeMovement->AddInputVector(RightVector * value);
+
+		if(Role != ROLE_Authority)
+		{
+			//Notify server
+			MoveHorizontalServer(value);
+		}
+	}
+}
+
+bool APlayerCube::MoveHorizontalServer_Validate(float value)
 {
 	return true;
 }
 
-void APlayerCube::MoveHorizontal_Implementation(float value)
+void APlayerCube::MoveHorizontalServer_Implementation(float value)
 {
-	if(value != 0)
+	if(value != 0 && Role == ROLE_Authority)
 	{
 		//Get right vector
 		FVector RightVector(0, 1, 0);
@@ -118,7 +167,7 @@ bool APlayerCube::Turn_Validate(float value)
 
 void APlayerCube::Turn_Implementation(float value)
 {
-	if(value != 0)
+	if(value != 0 && Role == ROLE_Authority)
 	{
 		//GetWorld()->GetDeltaSeconds()
 		FRotator Rotation = GetActorRotation();
@@ -153,6 +202,20 @@ void APlayerCube::OnStopFire()
 
 }
 
+void APlayerCube::OnRep_PosChange()
+{
+	if(!IsLocallyControlled())
+	{
+		SetActorLocation(CurrentPosition);
+	}
+}
+
+
+void APlayerCube::OnRep_RotChange()
+{
+	SetActorRotation(CurrentRotation);
+}
+
 UPawnMovementComponent* APlayerCube::GetMovementComponent() const
 {
 	return CubeMovement;
@@ -163,4 +226,6 @@ void APlayerCube::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(APlayerCube, CubeMovement);
+	DOREPLIFETIME(APlayerCube, CurrentPosition);
+	DOREPLIFETIME(APlayerCube, CurrentRotation);
 }

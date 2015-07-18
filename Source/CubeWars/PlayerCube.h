@@ -28,8 +28,10 @@ public:
 
 protected:
 
-	UFUNCTION(Server, WithValidation, unreliable)
 	void MoveHorizontal(float value);
+
+	UFUNCTION(Server, WithValidation, unreliable)
+	void MoveHorizontalServer(float value);
 
 	UFUNCTION(Server, WithValidation, unreliable)
 	void Turn(float value);
@@ -42,6 +44,18 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Stats)
 	float TurnRate;
+
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_PosChange)
+	FVector CurrentPosition;
+
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_RotChange)
+	FRotator CurrentRotation;
+
+	UFUNCTION()
+	void OnRep_PosChange();
+
+	UFUNCTION()
+	void OnRep_RotChange();
 
 	UPROPERTY(VisibleAnywhere, Category = Components)
 	UBoxComponent* CubeCollisionComponent;

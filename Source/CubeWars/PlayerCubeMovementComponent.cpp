@@ -9,12 +9,10 @@ UPlayerCubeMovementComponent::UPlayerCubeMovementComponent() : Speed(150.0f)
 
 }
 
-void UPlayerCubeMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+void UPlayerCubeMovementComponent::move(float DeltaTime)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 	// Make sure that everything is still valid, and that we are allowed to move.
-	if(!PawnOwner || !UpdatedComponent || ShouldSkipUpdate(DeltaTime))
+	if(!PawnOwner)
 	{
 		return;
 	}
@@ -26,7 +24,7 @@ void UPlayerCubeMovementComponent::TickComponent(float DeltaTime, enum ELevelTic
 		FHitResult Hit;
 		SafeMoveUpdatedComponent(DesiredMovementThisFrame, UpdatedComponent->GetComponentRotation(), true, Hit);
 	}
-};
+}
 
 void UPlayerCubeMovementComponent::SetSpeed(float speed)
 {

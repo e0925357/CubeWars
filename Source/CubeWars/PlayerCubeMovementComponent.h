@@ -16,7 +16,7 @@ class CUBEWARS_API UPlayerCubeMovementComponent : public UPawnMovementComponent
 public:
 	UPlayerCubeMovementComponent();
 
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+	void move(float DeltaTime);
 	
 	void SetSpeed(float speed);
 	float GetSpeed();
