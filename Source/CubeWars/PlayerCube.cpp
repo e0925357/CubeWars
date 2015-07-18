@@ -3,13 +3,15 @@
 #include "CubeWars.h"
 #include "PlayerCube.h"
 #include "PlayerCubeMovementComponent.h"
-
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 APlayerCube::APlayerCube() : TurnRate(20.0f)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
+	bReplicateMovement = true;
 
 	// Create and position a mesh component so we can see where our cube is
 	CubeVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
@@ -109,7 +111,12 @@ void APlayerCube::MoveHorizontal_Implementation(float value)
 	}
 }
 
-void APlayerCube::Turn(float value)
+bool APlayerCube::Turn_Validate(float value)
+{
+	return true;
+}
+
+void APlayerCube::Turn_Implementation(float value)
 {
 	if(value != 0)
 	{
@@ -149,4 +156,11 @@ void APlayerCube::OnStopFire()
 UPawnMovementComponent* APlayerCube::GetMovementComponent() const
 {
 	return CubeMovement;
+}
+
+void APlayerCube::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APlayerCube, CubeMovement);
 }

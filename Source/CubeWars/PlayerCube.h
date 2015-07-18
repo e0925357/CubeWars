@@ -31,6 +31,7 @@ protected:
 	UFUNCTION(Server, WithValidation, unreliable)
 	void MoveHorizontal(float value);
 
+	UFUNCTION(Server, WithValidation, unreliable)
 	void Turn(float value);
 
 	void OnStartFire();
@@ -48,7 +49,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = Components)
 	UStaticMeshComponent* CubeVisual;
 
-	UPROPERTY(VisibleAnywhere, Category = Components)
+	UPROPERTY(Replicated, VisibleAnywhere, Category = Components)
 	class UPlayerCubeMovementComponent* CubeMovement;
 	
 };
