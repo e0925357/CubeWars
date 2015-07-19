@@ -183,6 +183,8 @@ void APlayerCube::ClientDamageCallback_Implementation(float damageAmount)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, DamageSound, GetActorLocation());
 	}
+
+	HealthChanged();
 }
 
 // Called to bind functionality to input
@@ -221,7 +223,7 @@ void APlayerCube::MoveHorizontal(float value)
 
 bool APlayerCube::MoveHorizontalServer_Validate(float value)
 {
-	return  Health > 0;
+	return  true;
 }
 
 void APlayerCube::MoveHorizontalServer_Implementation(float value)
@@ -239,12 +241,20 @@ void APlayerCube::MoveHorizontalServer_Implementation(float value)
 	}
 }
 
-bool APlayerCube::Turn_Validate(float value)
+void APlayerCube::Turn(float value)
 {
-	return Health > 0;
+	if(value != 0)
+	{
+		TurnServer(value);
+	}
 }
 
-void APlayerCube::Turn_Implementation(float value)
+bool APlayerCube::TurnServer_Validate(float value)
+{
+	return true;
+}
+
+void APlayerCube::TurnServer_Implementation(float value)
 {
 	if(value != 0 && Role == ROLE_Authority && Health > 0)
 	{
@@ -273,22 +283,28 @@ void APlayerCube::Turn_Implementation(float value)
 
 bool APlayerCube::OnStartFire_Validate()
 {
-	return Health > 0;
+	return true;
 }
 
 void APlayerCube::OnStartFire_Implementation()
 {
-	IsShooting = true;
+	if(Health > 0)
+	{
+		IsShooting = true;
+	}
 }
 
 bool APlayerCube::OnStopFire_Validate()
 {
-	return Health > 0;
+	return true;
 }
 
 void APlayerCube::OnStopFire_Implementation()
 {
-	IsShooting = false;
+	if(Health > 0)
+	{
+		IsShooting = false;
+	}
 }
 
 void APlayerCube::OnRep_PosChange()

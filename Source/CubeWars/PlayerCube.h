@@ -31,8 +31,11 @@ public:
 
 protected:
 
-	UPROPERTY(Replicated, VisibleAnywhere, Category = Stats)
+	UPROPERTY(Replicated, BlueprintReadOnly, VisibleAnywhere, Category = Stats)
 	float Health;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void HealthChanged();
 
 	//---------------------------------------------------------------------------------------------
 	// Shooting
@@ -70,8 +73,10 @@ protected:
 	UFUNCTION(Server, WithValidation, unreliable)
 	void MoveHorizontalServer(float value);
 
-	UFUNCTION(Server, WithValidation, unreliable)
 	void Turn(float value);
+
+	UFUNCTION(Server, WithValidation, unreliable)
+	void TurnServer(float value);
 
 	UFUNCTION(Server, WithValidation, reliable)
 	void OnStartFire();
