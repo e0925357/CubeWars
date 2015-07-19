@@ -35,6 +35,34 @@ protected:
 	float Health;
 
 	//---------------------------------------------------------------------------------------------
+	// Shooting
+	//---------------------------------------------------------------------------------------------
+
+	/** Sound to play each time we fire */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	class USoundBase* FireSound;
+
+	/** Sound to play each time we take damage */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	class USoundBase* DamageSound;
+
+	/** The delay between shots */
+	UPROPERTY(EditAnywhere, Category = Stats)
+	float ShootDelay;
+
+	float ShootTimer;
+
+	bool IsShooting;
+
+	void Shoot();
+
+	UFUNCTION(Client, reliable)
+	void ShootOnClient();
+
+	UFUNCTION(NetMulticast, reliable)
+	void ClientDamageCallback(float damageAmount);
+
+	//---------------------------------------------------------------------------------------------
 	// Movement
 	//---------------------------------------------------------------------------------------------
 	void MoveHorizontal(float value);
@@ -45,8 +73,10 @@ protected:
 	UFUNCTION(Server, WithValidation, unreliable)
 	void Turn(float value);
 
+	UFUNCTION(Server, WithValidation, reliable)
 	void OnStartFire();
 
+	UFUNCTION(Server, WithValidation, reliable)
 	void OnStopFire();
 
 	FRotator InitinalRotation;
@@ -77,4 +107,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = Components)
 	UStaticMeshComponent* CubeVisual;
 	
+	/** Projectile class to spawn */
+	UPROPERTY(EditAnywhere, Category = Projectile)
+	TSubclassOf<class AProjectile> ProjectileClass;
 };

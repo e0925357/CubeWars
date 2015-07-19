@@ -2,11 +2,12 @@
 
 #include "CubeWars.h"
 #include "PlayerCube.h"
+#include "Projectile.h"
 #include "PlayerCubeMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
-APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f)
+APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f), ShootTimer(0.0f), ShootDelay(0.7f), IsShooting(false)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -18,10 +19,10 @@ APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f)
 	CubeVisual->SetCollisionProfileName(TEXT("Pawn"));
 	CubeVisual->SetSimulatePhysics(false);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/Meshes/SimpleCube.SimpleCube"));
-	if(SphereVisualAsset.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(TEXT("/Game/Meshes/SimpleCube.SimpleCube"));
+	if(CubeVisualAsset.Succeeded())
 	{
-		CubeVisual->SetStaticMesh(SphereVisualAsset.Object);
+		CubeVisual->SetStaticMesh(CubeVisualAsset.Object);
 		CubeVisual->SetWorldScale3D(FVector(5.0f));
 
 		static ConstructorHelpers::FObjectFinder<UMaterialInstance> Material(TEXT("/Game/Materials/Quadratic.Quadratic"));
@@ -104,6 +105,53 @@ void APlayerCube::Tick( float DeltaTime )
 			SetActorLocation(GetActorLocation() + CorrectionVector);
 		}
 	}
+
+	if(Role == ROLE_Authority)
+	{
+		//Handle shooting
+		if(ShootTimer <= 0)
+		{
+			if(IsShooting)
+			{
+				ShootTimer = ShootDelay;
+				Shoot();
+			}
+		}
+		else
+		{
+			ShootTimer -= DeltaTime;
+		}
+	}
+}
+
+void APlayerCube::Shoot()
+{
+	// try and fire a projectile
+	if(ProjectileClass != nullptr)
+	{
+		const FRotator SpawnRotation = GetActorRotation();
+		// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
+		const FVector OffsetVector(120.0f, 0.0f, 0.0f);
+		const FVector SpawnLocation = GetActorLocation() + SpawnRotation.RotateVector(OffsetVector);
+
+		UWorld* const World = GetWorld();
+		if(World != nullptr)
+		{
+			// spawn the projectile at the muzzle
+			AProjectile* projectile = World->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+		}
+	}
+
+	ShootOnClient();
+}
+
+void APlayerCube::ShootOnClient_Implementation()
+{
+	// try and play the sound if specified
+	if(FireSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	}
 }
 
 float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser)
@@ -120,9 +168,21 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 	if(Health <= 0)
 	{
 		//TODO: Handle player death
+		IsShooting = false;
 	}
 
+	ClientDamageCallback(DamageAmount);
+
 	return DamageAmount;
+}
+
+void APlayerCube::ClientDamageCallback_Implementation(float damageAmount)
+{
+	// try and play the sound if specified
+	if(DamageSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DamageSound, GetActorLocation());
+	}
 }
 
 // Called to bind functionality to input
@@ -211,14 +271,24 @@ void APlayerCube::Turn_Implementation(float value)
 	}
 }
 
-void APlayerCube::OnStartFire()
+bool APlayerCube::OnStartFire_Validate()
 {
-
+	return Health > 0;
 }
 
-void APlayerCube::OnStopFire()
+void APlayerCube::OnStartFire_Implementation()
 {
+	IsShooting = true;
+}
 
+bool APlayerCube::OnStopFire_Validate()
+{
+	return Health > 0;
+}
+
+void APlayerCube::OnStopFire_Implementation()
+{
+	IsShooting = false;
 }
 
 void APlayerCube::OnRep_PosChange()
