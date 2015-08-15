@@ -29,6 +29,9 @@ public:
 	//If the actor takes damage
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser);
 
+	//Tells the cube to start rising into the air!
+	void startRaising(float targetHeight);
+
 protected:
 
 	UPROPERTY(Replicated, BlueprintReadOnly, VisibleAnywhere, Category = Stats)
@@ -36,6 +39,11 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void HealthChanged();
+
+	void createDeathEffect(const FVector& location, const FRotator& rotation, FName name);
+
+	UFUNCTION(NetMulticast, reliable)
+	void startRaising_Client();
 
 	//---------------------------------------------------------------------------------------------
 	// Shooting
@@ -70,12 +78,12 @@ protected:
 	//---------------------------------------------------------------------------------------------
 	void MoveHorizontal(float value);
 
-	UFUNCTION(Server, WithValidation, unreliable)
+	UFUNCTION(Server, WithValidation, reliable)
 	void MoveHorizontalServer(float value);
 
 	void Turn(float value);
 
-	UFUNCTION(Server, WithValidation, unreliable)
+	UFUNCTION(Server, WithValidation, reliable)
 	void TurnServer(float value);
 
 	UFUNCTION(Server, WithValidation, reliable)
@@ -103,6 +111,9 @@ protected:
 
 	UPROPERTY(Replicated, VisibleAnywhere, Category = Components)
 	class UPlayerCubeMovementComponent* CubeMovement;
+
+	float targetHeight;
+	uint8 raisingState;
 
 
 	//---------------------------------------------------------------------------------------------

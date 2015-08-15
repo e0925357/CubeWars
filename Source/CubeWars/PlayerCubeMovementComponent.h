@@ -21,6 +21,13 @@ public:
 	void SetSpeed(float speed);
 	float GetSpeed();
 
+	void StartJitter();
+	void StopJitter();
+
 protected:
 	float Speed;
+	bool isJittering;
+	FVector truePosition;
+	FVector jitterOffset;
+	float jitterTimer;
 };

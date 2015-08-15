@@ -38,6 +38,8 @@ public:
 	
 private:
 	float Timer;
+
+	bool tick;
 	
 	UMaterialInstanceDynamic* MaterialInstance;
 };
