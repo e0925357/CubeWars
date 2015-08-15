@@ -5,9 +5,12 @@
 #include "Projectile.h"
 #include "PlayerCubeMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "CubeDeathController.h"
+#include "math.h"
+
 
 // Sets default values
-APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f), ShootTimer(0.0f), ShootDelay(0.7f), IsShooting(false)
+APlayerCube::APlayerCube() : TurnRate(20.0f), Health(1.0f), ShootTimer(0.0f), ShootDelay(0.7f), IsShooting(false), raisingState(0), targetHeight(0)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -53,8 +56,6 @@ APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f), ShootTimer(0.0f), 
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->CameraLagSpeed = 3.0f;
 
-	SpringArm->AttachTo(RootComponent);
-
 	// Create a camera and attach to our spring arm
 	UCameraComponent* Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ActualCamera"));
 	Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);
@@ -62,6 +63,16 @@ APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f), ShootTimer(0.0f), 
 	CubeMovement = CreateDefaultSubobject<UPlayerCubeMovementComponent>(TEXT("CubeMovement"));
 	CubeMovement->UpdatedComponent = RootComponent;
 	CubeMovement->SetSpeed(300.0f);
+
+	//Prepare the death effect
+	createDeathEffect(FVector(0, 0, 3.3333f), FRotator(0, 0, 0), TEXT("DeathEffect1"));
+	createDeathEffect(FVector(0, 0, -3.3333f), FRotator(0, 0, 0), TEXT("DeathEffect2"));
+
+	createDeathEffect(FVector(0, 3.3333f, 0), FRotator(0, 0, 90), TEXT("DeathEffect3"));
+	createDeathEffect(FVector(0, -3.3333f, 0), FRotator(0, 0, 90), TEXT("DeathEffect4"));
+
+	createDeathEffect(FVector(3.3333f, 0, 0), FRotator(90, 0, 0), TEXT("DeathEffect5"));
+	createDeathEffect(FVector(-3.3333f, 0, 0), FRotator(90, 0, 0), TEXT("DeathEffect6"));
 }
 
 // Called when the game starts or when spawned
@@ -79,6 +90,34 @@ void APlayerCube::Tick( float DeltaTime )
 
 	if(Role == ROLE_Authority || IsLocallyControlled())
 	{
+		//Handle jittering
+		if(Role == ROLE_Authority && raisingState >= 1)
+		{
+			if(raisingState == 1)
+			{
+				if(GetActorLocation().Z >= targetHeight)
+				{
+					raisingState = 2;
+
+					ACubeDeathController* deathController = Cast<ACubeDeathController>(GetController());
+
+					if(deathController != nullptr)
+					{
+						deathController->actorReachedHeight();
+					}
+				}
+				else
+				{
+					CubeMovement->AddInputVector(FVector::UpVector);
+				}
+			}
+
+			static const float DeathRotationSpeed = PI*0.68438f;
+			static const FVector direction(FMath::Sqrt(1.0f/3.0f), FMath::Sqrt(1.0f/3.0f), -FMath::Sqrt(1.0f/3.0f));
+
+			AddActorWorldRotation(FQuat(direction, DeathRotationSpeed*DeltaTime));
+		}
+
 		//Move locally(prediction) and at the server
 		CubeMovement->move(DeltaTime);
 
@@ -88,6 +127,11 @@ void APlayerCube::Tick( float DeltaTime )
 			CurrentPosition = GetActorLocation();
 			CurrentRotation = GetActorRotation();
 		}
+	}
+
+	if(raisingState == 0)
+	{
+		startRaising(100);
 	}
 
 	if(IsLocallyControlled() && Role != ROLE_Authority)
@@ -167,8 +211,24 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 
 	if(Health <= 0)
 	{
-		//TODO: Handle player death
 		IsShooting = false;
+
+		GetController()->UnPossess();
+		
+		FActorSpawnParameters SpawnInfo;
+		SpawnInfo.Instigator = Instigator;
+		SpawnInfo.bNoCollisionFail = true;
+		SpawnInfo.OverrideLevel = GetLevel();
+		SpawnInfo.ObjectFlags |= RF_Transient;	// We never want to save AI controllers into a map
+		AController* NewController = GetWorld()->SpawnActor<AController>(ACubeDeathController::StaticClass(), GetActorLocation(), GetActorRotation(), SpawnInfo);
+		if(NewController != nullptr)
+		{
+			// if successful will result in setting this->Controller 
+			// as part of possession mechanics
+			NewController->Possess(this);
+		}
+
+		bReplicateMovement = true;
 	}
 
 	ClientDamageCallback(DamageAmount);
@@ -333,4 +393,39 @@ void APlayerCube::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(APlayerCube, CubeMovement);
 	DOREPLIFETIME(APlayerCube, CurrentPosition);
 	DOREPLIFETIME(APlayerCube, CurrentRotation);
+}
+
+void APlayerCube::startRaising(float targetHeight)
+{
+	this->targetHeight = targetHeight;
+	raisingState = 1;
+	CubeMovement->StartJitter();
+	CubeMovement->SetSpeed(20.0f);
+
+	startRaising_Client();
+}
+
+void APlayerCube::startRaising_Client_Implementation()
+{
+	if(Role == ROLE_Authority) return;
+
+	auto DeathComponentArray = GetComponentsByTag(UDeathStarActorComponent::StaticClass(), TEXT("DeathEffect"));
+
+	for(UActorComponent* ActorComponent : DeathComponentArray)
+	{
+		USceneComponent* SceneComponent = dynamic_cast<USceneComponent*>(ActorComponent);
+		SceneComponent->SetVisibility(true, true);
+		SceneComponent->SetActive(true);
+	}
+}
+
+void APlayerCube::createDeathEffect(const FVector& location, const FRotator& rotation, FName name)
+{
+	UDeathStarActorComponent* deathEffect = CreateDefaultSubobject<UDeathStarActorComponent>(name);
+	deathEffect->ComponentTags.Add(TEXT("DeathEffect"));
+	deathEffect->SetVisibility(false, true);
+	deathEffect->SetActive(false);
+	deathEffect->SetRelativeLocation(location);
+	deathEffect->SetRelativeRotation(rotation);
+	deathEffect->AttachTo(GetRootComponent());
 }
