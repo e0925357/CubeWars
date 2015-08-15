@@ -8,6 +8,7 @@
 #include "CubeWarsGameState.h"
 
 ACubeWarsGameMode::ACubeWarsGameMode()
+	: NumObstacles(3)
 {
 	GameStateClass = ACubeWarsGameState::StaticClass();
 	DefaultPawnClass = APlayerCube::StaticClass();
@@ -105,4 +106,31 @@ AActor* ACubeWarsGameMode::ChoosePlayerStart_Implementation(AController* Player)
 	}
 	
 	return Super::ChoosePlayerStart_Implementation(Player);
+}
+
+void ACubeWarsGameMode::HandleMatchIsWaitingToStart()
+{
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.bNoCollisionFail = false;
+	SpawnParameters.Owner = this;
+	SpawnParameters.bDeferConstruction = false;
+
+	// TODO: Remove these hardcoded teddybears and replace the with a spawn area in the editor
+	float MinYPos = -1000.0f;
+	float MaxYPos = 1000.0f;
+	float MinXPos = -500.0f;
+	float MaxXPos = 500.0f;
+
+	FRandomStream RandStream;
+	RandStream.GenerateNewSeed();
+
+	for (int32 i = 0; i < NumObstacles; ++i)
+	{
+
+		float XPos = MinXPos + (MaxXPos - MinXPos) * (static_cast<float>(i) / (NumObstacles - 1));
+		float YPos = RandStream.FRandRange(MinYPos, MaxYPos);
+
+		AObstacle* obstacle = GetWorld()->SpawnActor<AObstacle>(DefaultObstacle, FVector(XPos, YPos, 90.0f), FRotator::ZeroRotator, SpawnParameters);
+		obstacle->MovingRight = RandStream.RandRange(0, 1) != 0;
+	}
 }

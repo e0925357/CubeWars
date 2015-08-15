@@ -3,6 +3,9 @@
 #pragma once
 
 #include "GameFramework/GameMode.h"
+
+#include "Obstacle.h"
+
 #include "CubeWarsGameMode.generated.h"
 
 /**
@@ -23,4 +26,14 @@ class CUBEWARS_API ACubeWarsGameMode : public AGameMode
 
 	/** Chooses the start of the player based on his team */
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+
+	/** Match is waiting to start and players are now spawned in */
+	virtual void HandleMatchIsWaitingToStart() override;
+
+protected:
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
+	TSubclassOf<AObstacle> DefaultObstacle;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
+	int32 NumObstacles;
 };
