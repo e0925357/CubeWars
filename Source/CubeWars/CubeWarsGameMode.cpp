@@ -6,6 +6,7 @@
 #include "PlayerCubeController.h"
 #include "CubeWarsPlayerState.h"
 #include "CubeWarsGameState.h"
+#include "ObstacleMovementComponent.h"
 
 ACubeWarsGameMode::ACubeWarsGameMode()
 	: NumObstacles(3)
@@ -131,6 +132,6 @@ void ACubeWarsGameMode::HandleMatchIsWaitingToStart()
 		float YPos = RandStream.FRandRange(MinYPos, MaxYPos);
 
 		AObstacle* obstacle = GetWorld()->SpawnActor<AObstacle>(DefaultObstacle, FVector(XPos, YPos, 90.0f), FRotator::ZeroRotator, SpawnParameters);
-		obstacle->MovingRight = RandStream.RandRange(0, 1) != 0;
+		obstacle->GetObstacleMovementComponent()->MovingRight = RandStream.RandRange(0, 1) != 0;
 	}
 }

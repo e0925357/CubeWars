@@ -5,6 +5,8 @@
 #include "GameFramework/Actor.h"
 #include "Obstacle.generated.h"
 
+class UObstacleMovementComponent;
+
 UCLASS()
 class CUBEWARS_API AObstacle : public AActor
 {
@@ -19,24 +21,15 @@ public:
 	
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
+
+	UObstacleMovementComponent* GetObstacleMovementComponent() { return movementComponent; };
 	
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Components)
 	UBoxComponent* BaseCollisionComponent;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Components)
 	UStaticMeshComponent* ObstacleVisual;
-
-	UPROPERTY(EditAnywhere, Category = Gameplay)
-	float LeftMovementTarget;
-
-	UPROPERTY(EditAnywhere, Category = Gameplay)
-	float RightMovementTarget;
-
-	/** The speed the obstacle is moving with  */
-	UPROPERTY(EditAnywhere, Category = Gameplay)
-	float MovementSpeed;
-
-	/** true if the obstacle is moving right, false if moving left */
-	UPROPERTY(EditAnywhere, Category = Gameplay)
-	bool MovingRight;
+protected:
+	UPROPERTY(VisibleAnywhere, Category = Components)
+	UObstacleMovementComponent* movementComponent;
 };

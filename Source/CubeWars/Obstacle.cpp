@@ -2,16 +2,16 @@
 
 #include "CubeWars.h"
 #include "Obstacle.h"
-
+#include "Components/InterpToMovementComponent.h"
+#include "ObstacleMovementComponent.h"
 
 // Sets default values
 AObstacle::AObstacle()
-	: MovementSpeed(10.0f)
-	, MovingRight(true)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	bReplicateMovement = true;
 
 	BaseCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("RootComponent"));
 	RootComponent = BaseCollisionComponent;
@@ -33,6 +33,10 @@ AObstacle::AObstacle()
 	//	UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Meshes/SimpleCube.SimpleCube'!"));
 	//}
 
+	movementComponent = CreateDefaultSubobject<UObstacleMovementComponent>(TEXT("ObstacleMovement"));
+	movementComponent->UpdatedComponent = RootComponent;
+	
+
 	ObstacleVisual->AttachTo(RootComponent);
 }
 
@@ -48,29 +52,6 @@ void AObstacle::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
-	FVector currentLocation = GetActorLocation();
 
-	if (MovingRight)
-	{
-		currentLocation.Y += MovementSpeed * DeltaTime;
-		
-		if (currentLocation.Y >= RightMovementTarget)
-		{
-			MovingRight = !MovingRight;
-			currentLocation.Y = RightMovementTarget;
-		}
-	}
-	else
-	{
-		currentLocation.Y -= MovementSpeed * DeltaTime;
-
-		if (currentLocation.Y <= LeftMovementTarget)
-		{
-			MovingRight = !MovingRight;
-			currentLocation.Y = LeftMovementTarget;
-		}
-	}
-
-	SetActorLocation(currentLocation);
+	
 }
-
