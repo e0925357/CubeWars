@@ -5,23 +5,25 @@
 
 
 // Sets default values for this component's properties
-UDeathStarActorComponent::UDeathStarActorComponent() : MaxStartOffset(10.0f), AnimationSpeed(0.4f)
+UDeathStarActorComponent::UDeathStarActorComponent()
+	: UStaticMeshComponent()
+	, MaxStartOffset(10.0f)
+	, AnimationSpeed(0.4f)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	bWantsBeginPlay = true;
 	PrimaryComponentTick.bCanEverTick = true;
 	
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
-	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
-	MeshComponent->SetSimulatePhysics(false);
+	SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetCollisionProfileName(TEXT("NoCollision"));
+	SetSimulatePhysics(false);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> VisualAsset(TEXT("/Game/Meshes/Plane.Plane"));
 	if(VisualAsset.Succeeded())
 	{
 		planeMesh = VisualAsset.Object;
-		MeshComponent->SetWorldScale3D(FVector(4.5f));
+		SetWorldScale3D(FVector(4.5f));
 	}
 	else
 	{
@@ -38,8 +40,6 @@ UDeathStarActorComponent::UDeathStarActorComponent() : MaxStartOffset(10.0f), An
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Materials/DeathStar.DeathStar'!"));
 	}
-
-	MeshComponent->AttachTo(this);
 }
 
 
@@ -50,19 +50,11 @@ void UDeathStarActorComponent::BeginPlay()
 
 	Timer = ((FMath::Rand()%1024)/1024.0f)*MaxStartOffset;
 	
-	if(MeshComponent != nullptr)
-	{
-		MeshComponent->SetStaticMesh(planeMesh);
-		MeshComponent->SetMaterial(0, Material);
-		MaterialInstance = MeshComponent->CreateDynamicMaterialInstance(0);
-		MeshComponent->SetMaterial(0, MaterialInstance);
-		tick = true;
-	}
-	else
-	{
-		SetComponentTickEnabled(false);
-		tick = false;
-	}
+	SetStaticMesh(planeMesh);
+	SetMaterial(0, Material);
+	MaterialInstance = CreateDynamicMaterialInstance(0);
+	SetMaterial(0, MaterialInstance);
+	tick = true;
 }
 
 

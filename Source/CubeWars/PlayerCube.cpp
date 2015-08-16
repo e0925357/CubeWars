@@ -402,7 +402,8 @@ void APlayerCube::startRaising(float targetHeight)
 
 void APlayerCube::startRaising_Client_Implementation()
 {
-	if(Role == ROLE_Authority) return;
+	// If this line is enabled, then the raising only works with dedicated servers
+	//if(Role == ROLE_Authority) return;
 
 	auto DeathComponentArray = GetComponentsByTag(UDeathStarActorComponent::StaticClass(), TEXT("DeathEffect"));
 

@@ -7,7 +7,7 @@
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class CUBEWARS_API UDeathStarActorComponent : public USceneComponent
+class CUBEWARS_API UDeathStarActorComponent : public UStaticMeshComponent
 {
 	GENERATED_BODY()
 
@@ -32,9 +32,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Animation)
 	UStaticMesh* planeMesh;
-
-	UPROPERTY(VisibleAnywhere, Category = Animation)
-	UStaticMeshComponent* MeshComponent;
 	
 private:
 	float Timer;
