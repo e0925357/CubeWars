@@ -8,9 +8,18 @@
 #include "CubeDeathController.h"
 #include "math.h"
 
+namespace
+{
+	void SpawnShockwave(UParticleSystem* ParticleSystem, const AActor& Actor, const FVector& RelLocation, const FRotator& RelRotation)
+	{
+		FTransform Transform(RelRotation, RelLocation);
+		FTransform ResultTransform = Transform * Actor.GetTransform();
+		UGameplayStatics::SpawnEmitterAtLocation(Actor.GetWorld(), ParticleSystem, ResultTransform.GetTranslation(), FRotator(ResultTransform.GetRotation()));
+	}
+}
 
 // Sets default values
-APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f), ShootTimer(0.0f), ShootDelay(0.7f), IsShooting(false), raisingState(0), targetHeight(0)
+APlayerCube::APlayerCube() : TurnRate(20.0f), Health(10.0f), ShootTimer(0.0f), ShootDelay(0.7f), IsShooting(false), raisingState(0), targetHeight(0)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -63,6 +72,17 @@ APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f), ShootTimer(0.0f), 
 	CubeMovement = CreateDefaultSubobject<UPlayerCubeMovementComponent>(TEXT("CubeMovement"));
 	CubeMovement->UpdatedComponent = RootComponent;
 	CubeMovement->SetSpeed(300.0f);
+
+	// Load shockwave
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleSystem(TEXT("/Game/Effects/ShockwaveEffect.ShockwaveEffect"));
+	if (ParticleSystem.Succeeded())
+	{
+		ShockwaveParticleSystem = ParticleSystem.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Effects/ShockwaveEffect.ShockwaveEffect'"));
+	}
 
 	//Prepare the death effect
 	createDeathEffect(FVector(0, 0, 3.3333f), FRotator(0, 0, 0), TEXT("DeathEffect1"));
@@ -433,4 +453,18 @@ void APlayerCube::createDeathEffect(const FVector& location, const FRotator& rot
 	deathEffect->SetRelativeLocation(location);
 	deathEffect->SetRelativeRotation(rotation);
 	deathEffect->AttachTo(GetRootComponent());
+}
+
+void APlayerCube::CreateShockWave_Implementation()
+{
+
+	// Spawn the shockwave effects
+	SpawnShockwave(ShockwaveParticleSystem, *this, FVector(3.3333f, 0, 0), FRotator(0, 0, 0));
+	SpawnShockwave(ShockwaveParticleSystem, *this, FVector(-3.3333f, 0, 0), FRotator(0, 0, 0));
+	
+	SpawnShockwave(ShockwaveParticleSystem, *this, FVector(0, 0, 3.3333f), FRotator(90, 0, 0));
+	SpawnShockwave(ShockwaveParticleSystem, *this, FVector(0, 0, -3.3333f), FRotator(90, 0, 0));
+	
+	SpawnShockwave(ShockwaveParticleSystem, *this, FVector(0, 3.3333f, 0), FRotator(0, 90, 0));
+	SpawnShockwave(ShockwaveParticleSystem, *this, FVector(0, -3.3333f, 0), FRotator(0, 90, 0));
 }

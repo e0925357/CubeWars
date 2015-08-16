@@ -36,10 +36,17 @@ public:
 	UFUNCTION(NetMulticast, reliable)
 	void warped();
 
+	// Tell the cube to create its death shockwaves
+	UFUNCTION(NetMulticast, Reliable)
+	void CreateShockWave();
+
 protected:
 
 	UPROPERTY(Replicated, BlueprintReadOnly, VisibleAnywhere, Category = Stats)
 	float Health;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UParticleSystem* ShockwaveParticleSystem;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void HealthChanged();

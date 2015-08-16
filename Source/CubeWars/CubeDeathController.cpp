@@ -6,9 +6,13 @@
 #include "CubeDebris.h"
 
 
-ACubeDeathController::ACubeDeathController() : targetHeight(300), breakTime(2), breakTimer(0), waiting(false), explosionForce(5000)
+ACubeDeathController::ACubeDeathController()
+	: targetHeight(300)
+	, breakTime(2)
+	, breakTimer(0)
+	, waiting(false)
+	, explosionForce(5000)
 {
-	
 }
 
 void ACubeDeathController::PostInitializeComponents()
@@ -42,6 +46,9 @@ void ACubeDeathController::TickActor(float DeltaTime, enum ELevelTick TickType, 
 			FVector Location;
 			FVector Impulse;
 			FVector ActorLocation = GetPawn()->GetActorLocation();
+
+			// Spawn the shockwave
+			playerCube->CreateShockWave();
 
 			for(float x = -33.3333f; x <= 33.3333f; x += 33.3333f)
 			{
