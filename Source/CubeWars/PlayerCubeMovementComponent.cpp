@@ -2,6 +2,7 @@
 
 #include "CubeWars.h"
 #include "PlayerCubeMovementComponent.h"
+#include "PlayerCube.h"
 
 
 UPlayerCubeMovementComponent::UPlayerCubeMovementComponent() : Speed(150.0f), isJittering(false)
@@ -47,6 +48,14 @@ void UPlayerCubeMovementComponent::move(float DeltaTime)
 			static const float DoubleOffset = Offset*2;
 
 			jitterOffset.Set(((FMath::Rand()%10000)/10000.0f)*DoubleOffset - Offset, ((FMath::Rand()%10000)/10000.0f)*DoubleOffset - Offset, ((FMath::Rand()%10000)/10000.0f)*DoubleOffset - Offset);
+
+			//Play sound
+			APlayerCube* player = Cast<APlayerCube>(PawnOwner);
+
+			if(player)
+			{
+				player->warped();
+			}
 		}
 
 		PawnOwner->SetActorLocation(truePosition + jitterOffset);

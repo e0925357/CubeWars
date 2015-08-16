@@ -32,6 +32,10 @@ public:
 	//Tells the cube to start rising into the air!
 	void startRaising(float targetHeight);
 
+	//Tells the cube it just warped
+	UFUNCTION(NetMulticast, reliable)
+	void warped();
+
 protected:
 
 	UPROPERTY(Replicated, BlueprintReadOnly, VisibleAnywhere, Category = Stats)
@@ -44,6 +48,14 @@ protected:
 
 	UFUNCTION(NetMulticast, reliable)
 	void startRaising_Client();
+
+	/** Sound to play each time the player warps */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Death)
+	class USoundBase* DeathWarpSound;
+
+	/** Sound to play while the player dies*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Death)
+	class USoundBase* DeathSound;
 
 	//---------------------------------------------------------------------------------------------
 	// Shooting

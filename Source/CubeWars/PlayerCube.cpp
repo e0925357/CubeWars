@@ -415,6 +415,15 @@ void APlayerCube::startRaising_Client_Implementation()
 	}
 }
 
+void APlayerCube::warped_Implementation()
+{
+	if(DeathWarpSound)
+	{
+		float pitch = 0.5f + (FMath::Rand()%1024)/1024.0f * 0.5f;
+		UGameplayStatics::PlaySoundAtLocation(this, DeathWarpSound, GetActorLocation(), 1.0f, pitch);
+	}
+}
+
 void APlayerCube::createDeathEffect(const FVector& location, const FRotator& rotation, FName name)
 {
 	UDeathStarActorComponent* deathEffect = CreateDefaultSubobject<UDeathStarActorComponent>(name);
