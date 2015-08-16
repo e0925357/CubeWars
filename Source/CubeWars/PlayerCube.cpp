@@ -129,6 +129,17 @@ void APlayerCube::Tick( float DeltaTime )
 		}
 	}
 
+	if(raisingState == 1)
+	{
+		DeathProgress = (GetActorLocation().Z - startHeight) / (targetHeight - startHeight);
+
+		if(deathAudioComponent)
+		{
+			deathAudioComponent->SetPitchMultiplier(1 + DeathProgress);
+		}
+
+	}
+
 	if(IsLocallyControlled() && Role != ROLE_Authority)
 	{
 		//Perform prediction correction
@@ -412,6 +423,15 @@ void APlayerCube::startRaising_Client_Implementation()
 		USceneComponent* SceneComponent = dynamic_cast<USceneComponent*>(ActorComponent);
 		SceneComponent->SetVisibility(true, true);
 		SceneComponent->SetActive(true);
+	}
+
+	DeathProgress = 0;
+	startHeight = GetActorLocation().Z;
+
+	if(DeathSound)
+	{
+		deathAudioComponent = UGameplayStatics::PlaySoundAttached(DeathSound, GetRootComponent());
+		deathAudioComponent->bStopWhenOwnerDestroyed = true;
 	}
 }
 

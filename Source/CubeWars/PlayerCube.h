@@ -57,6 +57,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Death)
 	class USoundBase* DeathSound;
 
+	float DeathProgress;
+
+	float startHeight;
+
+	UAudioComponent* deathAudioComponent;
+
 	//---------------------------------------------------------------------------------------------
 	// Shooting
 	//---------------------------------------------------------------------------------------------
