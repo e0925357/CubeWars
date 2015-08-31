@@ -9,7 +9,8 @@
 #include "ObstacleMovementComponent.h"
 
 ACubeWarsGameMode::ACubeWarsGameMode()
-	: NumObstacles(3)
+	: DefaultDestroyableObstacle(ADestroyableObstacle::StaticClass())
+	, NumObstacles(3)
 {
 	GameStateClass = ACubeWarsGameState::StaticClass();
 	DefaultPawnClass = APlayerCube::StaticClass();
@@ -131,7 +132,7 @@ void ACubeWarsGameMode::HandleMatchIsWaitingToStart()
 		float XPos = MinXPos + (MaxXPos - MinXPos) * (static_cast<float>(i) / (NumObstacles - 1));
 		float YPos = RandStream.FRandRange(MinYPos, MaxYPos);
 
-		AObstacle* obstacle = GetWorld()->SpawnActor<AObstacle>(DefaultObstacle, FVector(XPos, YPos, 90.0f), FRotator::ZeroRotator, SpawnParameters);
+		ADestroyableObstacle* obstacle = GetWorld()->SpawnActor<ADestroyableObstacle>(DefaultDestroyableObstacle, FVector(XPos, YPos, 90.0f), FRotator::ZeroRotator, SpawnParameters);
 		obstacle->GetObstacleMovementComponent()->MovingRight = RandStream.RandRange(0, 1) != 0;
 	}
 }

@@ -15,7 +15,7 @@ ACubeDebris::ACubeDebris()
 	// Create and position a mesh component so we can see where our cube is
 	CubeVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
 	CubeVisual->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	CubeVisual->SetCollisionProfileName(TEXT("Pawn"));
+	CubeVisual->SetCollisionProfileName(TEXT("Debris"));
 	CubeVisual->SetSimulatePhysics(true);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(TEXT("/Game/Meshes/SimpleCube.SimpleCube"));

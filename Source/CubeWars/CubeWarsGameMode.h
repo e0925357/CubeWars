@@ -5,6 +5,7 @@
 #include "GameFramework/GameMode.h"
 
 #include "Obstacle.h"
+#include "DestroyableObstacle.h"
 
 #include "CubeWarsGameMode.generated.h"
 
@@ -33,6 +34,9 @@ class CUBEWARS_API ACubeWarsGameMode : public AGameMode
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
 	TSubclassOf<AObstacle> DefaultObstacle;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
+	TSubclassOf<ADestroyableObstacle> DefaultDestroyableObstacle;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
 	int32 NumObstacles;
