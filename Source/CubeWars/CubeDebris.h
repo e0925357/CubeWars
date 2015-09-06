@@ -20,7 +20,21 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
+	/** Called once this actor has been deleted */
+	virtual void Destroyed();
+
 	UPROPERTY(VisibleAnywhere, Category=Components)
 	UStaticMeshComponent* CubeVisual;
 	
+	UPROPERTY(VisibleAnywhere, Category = Visual)
+	float DissolveStartTime;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UParticleSystem* DissolveParticleSystem;
+
+private:
+	UMaterialInstanceDynamic* MaterialInstance;
+	float Timer;
+	bool DissolveStarted;
+	UParticleSystemComponent* DissolveParticleSystemComponent;
 };

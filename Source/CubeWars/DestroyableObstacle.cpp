@@ -75,6 +75,10 @@ ADestroyableObstacle::ADestroyableObstacle()
 					FallOffParts.Add(NewVisuals[Index]);
 					NewVisuals.RemoveAt(Index);
 
+					Index = RandStream.RandRange(0, 1);
+					FallOffParts.Add(NewVisuals[Index]);
+					NewVisuals.RemoveAt(Index);
+
 					// Now the fixed parts
 					FixedParts.Append(NewVisuals);
 				}
@@ -99,24 +103,6 @@ ADestroyableObstacle::ADestroyableObstacle()
 void ADestroyableObstacle::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	//if (Role == ROLE_Authority)
-	//{
-	//	FActorSpawnParameters SpawnInfo;
-	//	FRotator rot = GetActorRotation();
-	//	FVector ActorLocation = GetActorLocation();
-	//	FVector Location = ActorLocation;
-
-	//	//for (int i = 0; i < NumPartColumns; ++i)
-	//	//{
-	//	// Spawn the four actors and attach them to this actor
-	//	ACubeDebris* debris = GetWorld()->SpawnActor<ACubeDebris>(ACubeDebris::StaticClass(), Location, rot, SpawnInfo);
-	//	debris->CubeVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//	debris->CubeVisual->SetSimulatePhysics(false);
-
-	//	debris->AttachRootComponentToActor(this, NAME_None, EAttachLocation::SnapToTarget, false);
-	//	//}
-	//}
 }
 
 // Called every frame
@@ -177,7 +163,7 @@ void ADestroyableObstacle::ClientDamageCallback_Implementation(float NewHealth)
 {
 	if (!IsRunningDedicatedServer())
 	{
-		const int32 NUM_TOTAL_FALLOFF_PARTS = (NumPartColumns * NUM_PARTS_PER_COLUMN) / 2;
+		const int32 NUM_TOTAL_FALLOFF_PARTS = ((NumPartColumns * NUM_PARTS_PER_COLUMN) * 3) / 4;
 		int32 RemainingParts = static_cast<int32>(NUM_TOTAL_FALLOFF_PARTS * (NewHealth / MaxHealth));
 
 		int32 NumPartsToFallOff = FMath::Max(0, FallOffParts.Num() - RemainingParts);
