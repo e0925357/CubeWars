@@ -20,7 +20,7 @@ class CUBEWARS_API ACubeWarsGameMode : public AGameMode
 	ACubeWarsGameMode();
 	
 	/** Before the login. Prevents that more than two players connect */
-	virtual void PreLogin(const FString& Options, const FString& Address, const TSharedPtr<class FUniqueNetId>& UniqueId, FString& ErrorMessage) override;
+	virtual void PreLogin(const FString& Options, const FString& Address, const TSharedPtr<const FUniqueNetId>& UniqueId, FString& ErrorMessage) override;
 
 	/** Starts the match warmup and determines the team of the player */
 	virtual void PostLogin(APlayerController* NewPlayer) override;

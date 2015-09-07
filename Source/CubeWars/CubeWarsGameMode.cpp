@@ -18,7 +18,7 @@ ACubeWarsGameMode::ACubeWarsGameMode()
 	PlayerStateClass = ACubeWarsPlayerState::StaticClass();
 }
 
-void ACubeWarsGameMode::PreLogin(const FString& Options, const FString& Address, const TSharedPtr<class FUniqueNetId>& UniqueId, FString& ErrorMessage)
+void ACubeWarsGameMode::PreLogin(const FString& Options, const FString& Address, const TSharedPtr<const FUniqueNetId>& UniqueId, FString& ErrorMessage)
 {
 	if (GameState->PlayerArray.Num() == 2)
 	{
@@ -113,7 +113,7 @@ AActor* ACubeWarsGameMode::ChoosePlayerStart_Implementation(AController* Player)
 void ACubeWarsGameMode::HandleMatchIsWaitingToStart()
 {
 	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.bNoCollisionFail = false;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParameters.Owner = this;
 	SpawnParameters.bDeferConstruction = false;
 
