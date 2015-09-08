@@ -249,7 +249,7 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 		
 		FActorSpawnParameters SpawnInfo;
 		SpawnInfo.Instigator = Instigator;
-		SpawnInfo.bNoCollisionFail = true;
+		SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
 		SpawnInfo.OverrideLevel = GetLevel();
 		SpawnInfo.ObjectFlags |= RF_Transient;	// We never want to save AI controllers into a map
 		AController* NewController = GetWorld()->SpawnActor<AController>(ACubeDeathController::StaticClass(), GetActorLocation(), GetActorRotation(), SpawnInfo);
@@ -461,7 +461,7 @@ void APlayerCube::startRaising_Client_Implementation()
 
 	if(DeathSound)
 	{
-		deathAudioComponent = UGameplayStatics::PlaySoundAttached(DeathSound, GetRootComponent());
+		deathAudioComponent = UGameplayStatics::SpawnSoundAttached(DeathSound, GetRootComponent());
 		deathAudioComponent->bStopWhenOwnerDestroyed = true;
 	}
 }
