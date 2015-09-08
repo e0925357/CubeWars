@@ -19,7 +19,7 @@ namespace
 }
 
 // Sets default values
-APlayerCube::APlayerCube() : TurnRate(20.0f), Health(10.0f), ShootTimer(0.0f), ShootDelay(0.7f), IsShooting(false), raisingState(0), targetHeight(0)
+APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f), ShootTimer(0.0f), ShootDelay(0.7f), IsShooting(false), raisingState(0), targetHeight(0)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -263,12 +263,12 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 		bReplicateMovement = true;
 	}
 
-	ClientDamageCallback(DamageAmount, DamageCauser);
+	ClientDamageCallback(DamageAmount, Health, DamageCauser);
 
 	return DamageAmount;
 }
 
-void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, AActor* DamageCauser)
+void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, float newHealth, AActor* DamageCauser)
 {
 	// try and play the sound if specified
 	if(DamageSound != nullptr)
@@ -279,6 +279,8 @@ void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, AActor
 	if(hitDecalMaterial && DamageCauser)
 		UGameplayStatics::SpawnDecalAttached(hitDecalMaterial, FVector(10, 10, 20), RootComponent, NAME_None, DamageCauser->GetActorLocation(), FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
 	
+	Health = newHealth;
+
 	HealthChanged();
 }
 

@@ -45,7 +45,7 @@ public:
 
 protected:
 
-	UPROPERTY(Replicated, BlueprintReadOnly, VisibleAnywhere, Category = Stats)
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = Stats)
 	float Health;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -99,7 +99,7 @@ protected:
 	void ShootOnClient();
 
 	UFUNCTION(NetMulticast, reliable)
-	void ClientDamageCallback(float damageAmount, AActor* DamageCauser);
+	void ClientDamageCallback(float damageAmount, float newHealth, AActor* DamageCauser);
 
 	//---------------------------------------------------------------------------------------------
 	// Movement
