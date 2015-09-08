@@ -40,6 +40,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void CreateShockWave();
 
+	UPROPERTY(EditDefaultsOnly)
+	UMaterialInterface* hitDecalMaterial;
+
 protected:
 
 	UPROPERTY(Replicated, BlueprintReadOnly, VisibleAnywhere, Category = Stats)
@@ -96,7 +99,7 @@ protected:
 	void ShootOnClient();
 
 	UFUNCTION(NetMulticast, reliable)
-	void ClientDamageCallback(float damageAmount);
+	void ClientDamageCallback(float damageAmount, AActor* DamageCauser);
 
 	//---------------------------------------------------------------------------------------------
 	// Movement

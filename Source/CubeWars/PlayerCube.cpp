@@ -68,6 +68,10 @@ APlayerCube::APlayerCube() : TurnRate(20.0f), Health(10.0f), ShootTimer(0.0f), S
 	// Create a camera and attach to our spring arm
 	UCameraComponent* Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ActualCamera"));
 	Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);
+	Camera->PostProcessSettings.MotionBlurAmount = 0.5f;
+	Camera->PostProcessSettings.MotionBlurMax = 0.5f;
+	Camera->PostProcessSettings.bOverride_MotionBlurAmount = true;
+	Camera->PostProcessSettings.bOverride_MotionBlurMax = true;
 
 	CubeMovement = CreateDefaultSubobject<UPlayerCubeMovementComponent>(TEXT("CubeMovement"));
 	CubeMovement->UpdatedComponent = RootComponent;
@@ -209,6 +213,8 @@ void APlayerCube::Shoot()
 		{
 			// spawn the projectile at the muzzle
 			AProjectile* projectile = World->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+
+			projectile->hitDecalMaterial = hitDecalMaterial;
 		}
 	}
 
@@ -257,12 +263,12 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 		bReplicateMovement = true;
 	}
 
-	ClientDamageCallback(DamageAmount);
+	ClientDamageCallback(DamageAmount, DamageCauser);
 
 	return DamageAmount;
 }
 
-void APlayerCube::ClientDamageCallback_Implementation(float damageAmount)
+void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, AActor* DamageCauser)
 {
 	// try and play the sound if specified
 	if(DamageSound != nullptr)
@@ -270,6 +276,9 @@ void APlayerCube::ClientDamageCallback_Implementation(float damageAmount)
 		UGameplayStatics::PlaySoundAtLocation(this, DamageSound, GetActorLocation());
 	}
 
+	if(hitDecalMaterial && DamageCauser)
+		UGameplayStatics::SpawnDecalAttached(hitDecalMaterial, FVector(10, 10, 20), RootComponent, NAME_None, DamageCauser->GetActorLocation(), FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
+	
 	HealthChanged();
 }
 

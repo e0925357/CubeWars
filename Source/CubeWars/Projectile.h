@@ -27,6 +27,17 @@ public:
 	UFUNCTION()
 	void OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	UMaterialInterface* hitDecalMaterial;
+
+	UFUNCTION(NetMulticast, reliable)
+	void OnHitMulticast();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnHitBP();
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> DebrisClass;
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category = Components)

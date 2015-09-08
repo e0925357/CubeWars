@@ -53,6 +53,8 @@ AProjectile::AProjectile() : damage(9.0f)
 
 	// Die after 5 seconds by default
 	InitialLifeSpan = 5.0f;
+
+	hitDecalMaterial = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -73,8 +75,37 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 {
 	if(OtherActor != nullptr && Role == ROLE_Authority)
 	{
-		OtherActor->TakeDamage(damage, FDamageEvent(), nullptr, nullptr);
+		OtherActor->TakeDamage(damage, FDamageEvent(), nullptr, this);
+
+		UWorld* const World = GetWorld();
+
+		if(World != nullptr)
+		{
+			for(int i = 0; i < 9; i++)
+			{
+				FVector Impulse((FMath::Rand()%1000) - 500, (FMath::Rand()%1000) - 500, (FMath::Rand()%1000) - 500);
+				Impulse.Normalize();
+
+				// spawn the debris
+				AActor* debris = World->SpawnActor<AActor>(DebrisClass, GetActorLocation() + Impulse, FRotator(0, 0, 0));
+
+				UPrimitiveComponent* primitive = Cast<UPrimitiveComponent>(debris);
+
+				if(primitive != nullptr)
+				{
+					Impulse *= 5000;
+					primitive->AddImpulse(Impulse);
+				}
+			}
+		}
+
+		OnHitMulticast();
 
 		Destroy();
 	}
+}
+
+void AProjectile::OnHitMulticast_Implementation()
+{
+	OnHitBP();
 }
