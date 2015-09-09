@@ -10,7 +10,7 @@
 
 ACubeWarsGameMode::ACubeWarsGameMode()
 	: DefaultDestroyableObstacle(ADestroyableObstacle::StaticClass())
-	, NumObstacles(3)
+	, NumObstacles(3), startTimer(3.0f), bStartTimer(false)
 {
 	GameStateClass = ACubeWarsGameState::StaticClass();
 	DefaultPawnClass = APlayerCube::StaticClass();
@@ -20,7 +20,7 @@ ACubeWarsGameMode::ACubeWarsGameMode()
 
 void ACubeWarsGameMode::PreLogin(const FString& Options, const FString& Address, const TSharedPtr<const FUniqueNetId>& UniqueId, FString& ErrorMessage)
 {
-	if (GameState->PlayerArray.Num() == 2)
+	if (GameState->PlayerArray.Num() >= 2)
 	{
 		// Thou shall not haz more than two players
 		ErrorMessage = TEXT("Match is full!");
@@ -134,5 +134,66 @@ void ACubeWarsGameMode::HandleMatchIsWaitingToStart()
 
 		ADestroyableObstacle* obstacle = GetWorld()->SpawnActor<ADestroyableObstacle>(DefaultDestroyableObstacle, FVector(XPos, YPos, 90.0f), FRotator::ZeroRotator, SpawnParameters);
 		obstacle->GetObstacleMovementComponent()->MovingRight = RandStream.RandRange(0, 1) != 0;
+	}
+}
+
+/** @return True if ready to Start Match. Games should override this */
+bool ACubeWarsGameMode::ReadyToStartMatch_Implementation()
+{
+	if(GetMatchState() != MatchState::WaitingToStart || NumPlayers < 2)
+	{
+		return false;
+	}
+
+	if(bStartTimer)
+	{
+		if(startTimer <= 0)
+		{
+			startTimer = 3.0f;
+			bStartTimer = false;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	UWorld* world = GetWorld();
+
+	if(world == nullptr)
+	{
+		return false;
+	}
+
+	//Check if all players have already loaded the world in
+	for(FConstPlayerControllerIterator iter = world->GetPlayerControllerIterator(); iter; ++iter)
+	{
+		APlayerController* playerController = *iter;
+
+		if(!playerController->HasClientLoadedCurrentWorld())
+		{
+			return false;
+		}
+	}
+
+	bStartTimer = true;
+
+	return false;
+}
+
+/** @return true if ready to End Match. Games should override this */
+bool ACubeWarsGameMode::ReadyToEndMatch_Implementation()
+{
+	//TODO: implement end condition
+	return false;
+}
+
+void ACubeWarsGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if(bStartTimer)
+	{
+		startTimer -= DeltaSeconds;
 	}
 }

@@ -31,6 +31,14 @@ class CUBEWARS_API ACubeWarsGameMode : public AGameMode
 	/** Match is waiting to start and players are now spawned in */
 	virtual void HandleMatchIsWaitingToStart() override;
 
+	/** @return True if ready to Start Match. Games should override this */
+	virtual bool ReadyToStartMatch_Implementation() override;
+
+	/** @return true if ready to End Match. Games should override this */
+	virtual bool ReadyToEndMatch_Implementation() override;
+
+	virtual void Tick(float DeltaSeconds) override;
+
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
 	TSubclassOf<AObstacle> DefaultObstacle;
@@ -40,4 +48,8 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
 	int32 NumObstacles;
+
+private:
+	float startTimer;
+	bool bStartTimer;
 };
