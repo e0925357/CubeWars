@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CubeDebris.h"
 #include "GameFramework/Actor.h"
 #include "DestroyableObstacle.generated.h"
 
@@ -53,6 +54,9 @@ protected:
 
 	UPROPERTY(Replicated, BlueprintReadOnly, VisibleAnywhere, Category = Stats)
 	float Health;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<ACubeDebris> DebrisClass;
 
 	UPROPERTY(VisibleAnywhere, Category = Components)
 	UObstacleMovementComponent* MovementComponent;

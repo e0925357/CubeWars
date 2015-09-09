@@ -87,7 +87,14 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 				Impulse.Normalize();
 
 				// spawn the debris
-				AActor* debris = World->SpawnActor<AActor>(DebrisClass, GetActorLocation() + Impulse, FRotator(0, 0, 0));
+				ACubeDebris* debris = World->SpawnActor<ACubeDebris>(DebrisClass, GetActorLocation() + Impulse, FRotator(0, 0, 0));
+
+				FLinearColor PartColor;
+
+				if (CubeVisual->GetMaterial(0)->GetVectorParameterValue("Base Color", PartColor))
+				{
+					debris->SetDebrisColorMulticast(PartColor);
+				}
 
 				UPrimitiveComponent* primitive = Cast<UPrimitiveComponent>(debris);
 

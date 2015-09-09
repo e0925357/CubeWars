@@ -217,11 +217,18 @@ void ADestroyableObstacle::CreateDebris(UStaticMeshComponent* PartVisual)
 	Impulse *= ExplosionForce;
 
 	// Location and Rotation is not correctly set here, but getting the location and rotation from the component in world space does not work?
-	ACubeDebris* debris = World->SpawnActor<ACubeDebris>(ACubeDebris::StaticClass(), Location, GetActorRotation(), SpawnInfo);
+	ACubeDebris* debris = World->SpawnActor<ACubeDebris>(DebrisClass, Location, GetActorRotation(), SpawnInfo);
 	debris->SetReplicates(false);
 	debris->SetActorScale3D(PartVisual->GetComponentScale());
 
 	debris->CubeVisual->AddImpulse(Impulse);
+
+	FLinearColor PartColor;
+
+	if (PartVisual->GetMaterial(0)->GetVectorParameterValue("Base Color", PartColor))
+	{
+		debris->SetDebrisColor(PartColor);
+	}
 }
 
 void ADestroyableObstacle::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

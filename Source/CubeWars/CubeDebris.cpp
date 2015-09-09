@@ -6,7 +6,10 @@
 
 // Sets default values
 ACubeDebris::ACubeDebris()
-	: DissolveStartTime(3.0f)
+	: CubeVisual(nullptr)
+	, DissolveStartTime(3.0f)
+	, DebrisColor(1.0f, 1.0f, 1.0f)
+	, DissolveColor(0.0f, 1.0f, 0.0f, 1.0f)
 	, Timer(0.0f)
 	, DissolveStarted(false)
 	, DissolveParticleSystemComponent(nullptr)
@@ -37,6 +40,13 @@ ACubeDebris::ACubeDebris()
 			UMaterialInstance* mat = (UMaterialInstance*)Material.Object;
 
 			CubeVisual->SetMaterial(0, mat);
+
+			FLinearColor PartColor;
+
+			if (CubeVisual->GetMaterial(0)->GetVectorParameterValue("Base Color", PartColor))
+			{
+				DebrisColor = PartColor;
+			}
 		} else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Materials/QuadraticTransparent.QuadraticTransparent'!"));
@@ -72,6 +82,8 @@ void ACubeDebris::BeginPlay()
 	
 	MaterialInstance = CubeVisual->CreateDynamicMaterialInstance(0);
 	CubeVisual->SetMaterial(0, MaterialInstance);
+
+	MaterialInstance->SetVectorParameterValue("Base Color", DebrisColor);
 }
 
 // Called every frame
@@ -87,6 +99,17 @@ void ACubeDebris::Tick( float DeltaTime )
 		{
 			// Play the particle effect
 			DissolveParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DissolveParticleSystem, GetActorLocation(), FRotator::ZeroRotator);
+			DissolveParticleSystemComponent->bAutoDestroy = true;
+
+			const FBox ActorAABB = GetComponentsBoundingBox(true);
+			const FVector AABBExtent = ActorAABB.GetExtent();
+
+			DissolveParticleSystemComponent->SetVectorRandParameter("SpawnArea", AABBExtent, -AABBExtent);
+
+			float ParticleSize = FMath::Max(2.0f, FMath::Min(AABBExtent.X, AABBExtent.Y) / 4.0f);
+			DissolveParticleSystemComponent->SetVectorParameter("Size", FVector(ParticleSize));
+
+			DissolveParticleSystemComponent->SetColorParameter("InitialColor", DissolveColor);
 
 			DissolveStarted = true;
 		}
@@ -100,6 +123,20 @@ void ACubeDebris::Destroyed()
 {
 	if (DissolveParticleSystemComponent)
 	{
-		DissolveParticleSystemComponent->Deactivate();
+		DissolveParticleSystemComponent->DestroyComponent();
 	}
+}
+
+void ACubeDebris::SetDebrisColor(const FLinearColor& NewColor)
+{
+	DebrisColor = NewColor;
+	if (MaterialInstance)
+	{
+		MaterialInstance->SetVectorParameterValue("Base Color", DebrisColor);
+	}
+}
+
+void ACubeDebris::SetDebrisColorMulticast_Implementation(const FLinearColor& NewColor)
+{
+	SetDebrisColor(NewColor);
 }

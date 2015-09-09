@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CubeDebris.h"
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
@@ -36,7 +37,7 @@ public:
 	void OnHitBP();
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AActor> DebrisClass;
+	TSubclassOf<ACubeDebris> DebrisClass;
 
 protected:
 
