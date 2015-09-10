@@ -25,3 +25,13 @@ void ACubeWarsPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(ACubeWarsPlayerState, TeamNumber);
 }
+
+void ACubeWarsPlayerState::AddPoints(int32 amount)
+{
+	Points += amount;
+}
+
+int32 ACubeWarsPlayerState::GetPoints()
+{
+	return Points;
+}

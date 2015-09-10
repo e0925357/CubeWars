@@ -15,7 +15,7 @@ namespace MatchState
 
 ACubeWarsGameMode::ACubeWarsGameMode()
 	: DefaultDestroyableObstacle(ADestroyableObstacle::StaticClass())
-	, NumObstacles(3), startTimer(3.0f), nextSecond(0), WaitTime(4)
+	, NumObstacles(3), startTimer(3.0f), nextSecond(0), WaitTime(4), winnerTeam(-1)
 {
 	GameStateClass = ACubeWarsGameState::StaticClass();
 	DefaultPawnClass = APlayerCube::StaticClass();
@@ -174,8 +174,7 @@ bool ACubeWarsGameMode::ReadyToStartMatch_Implementation()
 /** @return true if ready to End Match. Games should override this */
 bool ACubeWarsGameMode::ReadyToEndMatch_Implementation()
 {
-	//TODO: implement end condition
-	return false;
+	return GetMatchState() == MatchState::Fight && winnerTeam > 0;
 }
 
 void ACubeWarsGameMode::Tick(float DeltaSeconds)
@@ -248,6 +247,22 @@ void ACubeWarsGameMode::Tick(float DeltaSeconds)
 			SetMatchState(MatchState::Fight);
 		}
 	}
+
+	//Should we end the match?
+	if(IsMatchInProgress() && ReadyToEndMatch())
+	{
+		EndMatch();
+	}
+}
+
+bool ACubeWarsGameMode::IsMatchInProgress() const
+{
+	if(GetMatchState() == MatchState::InProgress || GetMatchState() == MatchState::Fight)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void ACubeWarsGameMode::StartMatch()
@@ -266,6 +281,7 @@ void ACubeWarsGameMode::StartMatch()
 
 	startTimer = WaitTime;
 	nextSecond = WaitTime;
+	winnerTeam = -1;
 
 	UWorld* world = GetWorld();
 
@@ -288,4 +304,27 @@ void ACubeWarsGameMode::StartMatch()
 	}
 
 	SetMatchState(MatchState::InProgress);
+}
+
+void ACubeWarsGameMode::playerDied(int32 team)
+{
+	if(team == 1)
+	{
+		winnerTeam = 2;
+	}
+	else if(team == 2)
+	{
+		winnerTeam = 1;
+	}
+
+	//Add a point to the winning team
+	for(APlayerState* playerState: GameState->PlayerArray)
+	{
+		ACubeWarsPlayerState* cwPlayerState = Cast<ACubeWarsPlayerState>(playerState);
+
+		if(cwPlayerState != nullptr && cwPlayerState->GetTeamNumber() == winnerTeam)
+		{
+			cwPlayerState->AddPoints();
+		}
+	}
 }

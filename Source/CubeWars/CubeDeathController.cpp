@@ -4,6 +4,9 @@
 #include "CubeDeathController.h"
 #include "PlayerCube.h"
 #include "CubeDebris.h"
+#include "PlayerCubeController.h"
+#include "CubeWarsPlayerState.h"
+#include "CubeWarsGameMode.h"
 
 
 ACubeDeathController::ACubeDeathController()
@@ -12,6 +15,7 @@ ACubeDeathController::ACubeDeathController()
 	, breakTimer(0)
 	, waiting(false)
 	, explosionForce(5000)
+	, teamNumber(0)
 {
 }
 
@@ -68,6 +72,14 @@ void ACubeDeathController::TickActor(float DeltaTime, enum ELevelTick TickType, 
 				}
 			}
 
+			//Tell the gamemode that we are dead
+			if(GetWorld() != nullptr)
+			{
+				ACubeWarsGameMode* cwgm = GetWorld()->GetAuthGameMode<ACubeWarsGameMode>();
+
+				cwgm->playerDied(teamNumber);
+			}
+
 			//Destroy actor
 			GetPawn()->Destroy();
 		}
@@ -85,4 +97,9 @@ void ACubeDeathController::Possess(APawn* InPawn)
 		//tell cube to rise
 		playerCube->startRaising(targetHeight);
 	}
+}
+
+void ACubeDeathController::setTeamNumer(int32 teamNumber)
+{
+	this->teamNumber = teamNumber;
 }

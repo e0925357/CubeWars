@@ -8,6 +8,7 @@
 #include "CubeDeathController.h"
 #include "math.h"
 #include "PlayerCubeController.h"
+#include "CubeWarsPlayerState.h"
 
 namespace
 {
@@ -250,6 +251,7 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 	{
 		IsShooting = false;
 
+		int32 teamNumber = Cast<ACubeWarsPlayerState>(GetController()->PlayerState)->GetTeamNumber();
 		GetController()->UnPossess();
 		
 		FActorSpawnParameters SpawnInfo;
@@ -257,12 +259,13 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 		SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
 		SpawnInfo.OverrideLevel = GetLevel();
 		SpawnInfo.ObjectFlags |= RF_Transient;	// We never want to save AI controllers into a map
-		AController* NewController = GetWorld()->SpawnActor<AController>(ACubeDeathController::StaticClass(), GetActorLocation(), GetActorRotation(), SpawnInfo);
+		ACubeDeathController* NewController = GetWorld()->SpawnActor<ACubeDeathController>(ACubeDeathController::StaticClass(), GetActorLocation(), GetActorRotation(), SpawnInfo);
 		if(NewController != nullptr)
 		{
 			// if successful will result in setting this->Controller 
 			// as part of possession mechanics
 			NewController->Possess(this);
+			NewController->setTeamNumer(teamNumber);
 		}
 
 		bReplicateMovement = true;
