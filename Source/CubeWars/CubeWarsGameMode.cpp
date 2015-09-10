@@ -8,9 +8,14 @@
 #include "CubeWarsGameState.h"
 #include "ObstacleMovementComponent.h"
 
+namespace MatchState
+{
+	const FName Fight = TEXT("Fight");
+}
+
 ACubeWarsGameMode::ACubeWarsGameMode()
 	: DefaultDestroyableObstacle(ADestroyableObstacle::StaticClass())
-	, NumObstacles(3), startTimer(3.0f), bStartTimer(false)
+	, NumObstacles(3), startTimer(3.0f), nextSecond(0), WaitTime(4)
 {
 	GameStateClass = ACubeWarsGameState::StaticClass();
 	DefaultPawnClass = APlayerCube::StaticClass();
@@ -145,19 +150,6 @@ bool ACubeWarsGameMode::ReadyToStartMatch_Implementation()
 		return false;
 	}
 
-	if(bStartTimer)
-	{
-		if(startTimer <= 0)
-		{
-			startTimer = 3.0f;
-			bStartTimer = false;
-
-			return true;
-		}
-
-		return false;
-	}
-
 	UWorld* world = GetWorld();
 
 	if(world == nullptr)
@@ -176,9 +168,7 @@ bool ACubeWarsGameMode::ReadyToStartMatch_Implementation()
 		}
 	}
 
-	bStartTimer = true;
-
-	return false;
+	return true;
 }
 
 /** @return true if ready to End Match. Games should override this */
@@ -192,8 +182,110 @@ void ACubeWarsGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if(bStartTimer)
+	if(GetMatchState() == MatchState::InProgress)
 	{
 		startTimer -= DeltaSeconds;
+
+		UWorld* world = GetWorld();
+
+		if(world == nullptr)
+		{
+			return;
+		}
+
+		if(startTimer <= nextSecond)
+		{
+			if(nextSecond > 0)
+			{
+				//Show next number
+				for(FConstPlayerControllerIterator iter = world->GetPlayerControllerIterator(); iter; ++iter)
+				{
+					APlayerController* playerController = *iter;
+
+					APlayerCubeController* playerCubeController = Cast<APlayerCubeController>(playerController);
+
+					if(playerCubeController != nullptr)
+					{
+						playerCubeController->showFullscreenMessage(FString::FromInt(nextSecond));
+					}
+				}
+			}
+			else
+			{
+				//Show GO message
+				for(FConstPlayerControllerIterator iter = world->GetPlayerControllerIterator(); iter; ++iter)
+				{
+					APlayerController* playerController = *iter;
+
+					APlayerCubeController* playerCubeController = Cast<APlayerCubeController>(playerController);
+
+					if(playerCubeController != nullptr)
+					{
+						playerCubeController->showFullscreenMessage(TEXT("GO!"));
+					}
+				}
+			}
+
+			--nextSecond;
+		}
+
+		if(startTimer <= 0)
+		{
+
+			//Enable shots for all players
+			for(FConstPlayerControllerIterator iter = world->GetPlayerControllerIterator(); iter; ++iter)
+			{
+				APlayerController* playerController = *iter;
+
+				APlayerCubeController* playerCubeController = Cast<APlayerCubeController>(playerController);
+
+				if(playerCubeController != nullptr)
+				{
+					playerCubeController->setCanShoot(true);
+				}
+			}
+
+			SetMatchState(MatchState::Fight);
+		}
 	}
+}
+
+void ACubeWarsGameMode::StartMatch()
+{
+	if(HasMatchStarted())
+	{
+		// Already started
+		return;
+	}
+
+	//Let the game session override the StartMatch function, in case it wants to wait for arbitration
+	if(GameSession->HandleStartMatchRequest())
+	{
+		return;
+	}
+
+	startTimer = WaitTime;
+	nextSecond = WaitTime;
+
+	UWorld* world = GetWorld();
+
+	if(world == nullptr)
+	{
+		return;
+	}
+
+	//Disable shots for all players
+	for(FConstPlayerControllerIterator iter = world->GetPlayerControllerIterator(); iter; ++iter)
+	{
+		APlayerController* playerController = *iter;
+
+		APlayerCubeController* playerCubeController = Cast<APlayerCubeController>(playerController);
+
+		if(playerCubeController != nullptr)
+		{
+			playerCubeController->setCanShoot(false);
+		}
+	}
+
+	SetMatchState(MatchState::InProgress);
 }
