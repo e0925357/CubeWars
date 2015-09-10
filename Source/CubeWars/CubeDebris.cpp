@@ -99,7 +99,7 @@ void ACubeDebris::Tick( float DeltaTime )
 		{
 			// Play the particle effect
 			DissolveParticleSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DissolveParticleSystem, GetActorLocation(), FRotator::ZeroRotator);
-			DissolveParticleSystemComponent->bAutoDestroy = true;
+			//DissolveParticleSystemComponent->bAutoDestroy = true;
 
 			const FBox ActorAABB = GetComponentsBoundingBox(true);
 			const FVector AABBExtent = ActorAABB.GetExtent();
@@ -121,7 +121,9 @@ void ACubeDebris::Tick( float DeltaTime )
 
 void ACubeDebris::Destroyed()
 {
-	if (DissolveParticleSystemComponent)
+	Super::Destroyed();
+
+	if (DissolveParticleSystemComponent->IsValidLowLevel())
 	{
 		DissolveParticleSystemComponent->DestroyComponent();
 	}
