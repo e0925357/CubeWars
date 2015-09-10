@@ -13,11 +13,18 @@ namespace {
 
 // Sets default values
 ADestroyableObstacle::ADestroyableObstacle()
-	: NumPartColumns(5)
+	: MinConstructionTime(0.5f)
+	, MaxConstructionTime(1.0f)
+	, MinConstructionDistanceMultiplier(2.0f)
+	, MaxConstructionDistanceMultiplier(3.0f)
+	, NumPartColumns(5)
 	, Dimensions(20.0f, 300.0f, 50.0f)
 	, ExplosionForce(5000.0f)
 	, MaxHealth(26.0f)
 	, Health(MaxHealth)
+	, TotalConstructionTime(MaxConstructionTime)
+	, ConstructionTimer(0.0f)
+	, FinalPartMaterial(nullptr)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -48,7 +55,7 @@ ADestroyableObstacle::ADestroyableObstacle()
 		static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(TEXT("/Game/Meshes/SimpleCube.SimpleCube"));
 		if (CubeVisualAsset.Succeeded())
 		{
-			static ConstructorHelpers::FObjectFinder<UMaterialInstance> Material(TEXT("/Game/Materials/Quadratic.Quadratic"));
+			static ConstructorHelpers::FObjectFinder<UMaterialInstance> Material(TEXT("/Game/Materials/QuadraticTransparent.QuadraticTransparent"));
 
 			if (Material.Succeeded())
 			{
@@ -85,13 +92,24 @@ ADestroyableObstacle::ADestroyableObstacle()
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Materials/Quadratic.Quadratic'!"));
+				UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Materials/QuadraticTransparent.QuadraticTransparent'!"));
 			}
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Meshes/SimpleCube.SimpleCube'!"));
 		}
+	}
+
+	// Load the material FinalPartMaterial
+	static ConstructorHelpers::FObjectFinder<UMaterialInstance> Material(TEXT("/Game/Materials/Quadratic.Quadratic"));
+	if (Material.Succeeded())
+	{
+		FinalPartMaterial = Material.Object;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Materials/Quadratic.Quadratic'!"));
 	}
 
 	// Movement component
@@ -103,6 +121,22 @@ ADestroyableObstacle::ADestroyableObstacle()
 void ADestroyableObstacle::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TotalConstructionTime = MaxConstructionTime;
+
+	// Initialize the construction structs for the parts of the obstacle
+	FRandomStream Rand;
+	for (int32 i = 0; i < ConstructionProgresses.Num(); ++i)
+	{
+		PartConstructionProgress& PartProgress = ConstructionProgresses[i];
+		PartProgress.StartPosition = PartProgress.FinalPosition * Rand.FRandRange(MinConstructionDistanceMultiplier, MaxConstructionDistanceMultiplier);
+		PartProgress.TotalTime = Rand.FRandRange(MinConstructionTime, MaxConstructionTime);
+
+		UMaterialInstanceDynamic* MaterialInstance = PartProgress.CubeVisual->CreateDynamicMaterialInstance(0);
+		PartProgress.CubeVisual->SetMaterial(0, MaterialInstance);
+		PartProgress.MaterialInstance = MaterialInstance;
+		MaterialInstance->SetScalarParameterValue("Opacity", 0.0f);
+	}
 }
 
 // Called every frame
@@ -110,35 +144,77 @@ void ADestroyableObstacle::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
+	for (int32 i = 0; i < ConstructionProgresses.Num();)
+	{
+		PartConstructionProgress& PartProgress = ConstructionProgresses[i];
+		PartProgress.CurrentTime += DeltaTime;
+
+		UStaticMeshComponent* CubeVisual = PartProgress.CubeVisual;
+		UMaterialInstanceDynamic* MaterialInstance = PartProgress.MaterialInstance;
+		FVector NewPosition;
+		float NewOpacity;
+
+		if (PartProgress.CurrentTime >= PartProgress.TotalTime)
+		{
+			NewPosition = PartProgress.FinalPosition;
+			NewOpacity = 1.0f;
+			ConstructionProgresses.RemoveAt(i);
+
+			if (FinalPartMaterial)
+			{
+				CubeVisual->SetMaterial(0, FinalPartMaterial);
+			}
+		}
+		else
+		{
+			float Delta = PartProgress.CurrentTime / PartProgress.TotalTime;
+			NewPosition = FMath::Lerp(PartProgress.StartPosition, PartProgress.FinalPosition, Delta);
+			NewOpacity = Delta;
+			++i;
+		}
+
+		CubeVisual->SetRelativeLocation(NewPosition);
+
+		if (MaterialInstance)
+		{
+			MaterialInstance->SetScalarParameterValue("Opacity", NewOpacity);
+		}
+
+	}
 }
 
 float ADestroyableObstacle::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	if (Health <= 0)
+	if (IsConstructionInProgress())
 	{
-		return 0;
+		if (Health <= 0)
+		{
+			return 0;
+		}
+
+		Health -= DamageAmount;
+
+
+
+		if (Health <= 0)
+		{
+			// Let all the parts fly around and despawn the actor
+			ClientFallApart();
+
+			Destroy();
+		}
+		else
+		{
+			// Let some parts fly around
+			ClientDamageCallback(Health);
+		}
+
+		return DamageAmount;
 	}
 
-	Health -= DamageAmount;
-
-
-
-	if (Health <= 0)
-	{
-		// Let all the parts fly around and despawn the actor
-		ClientFallApart();
-
-		Destroy();
-	}
-	else
-	{
-		// Let some parts fly around
-		ClientDamageCallback(Health);
-	}
-
-	return DamageAmount;
+	return 0.0f;
 }
 
 UStaticMeshComponent* ADestroyableObstacle::CreateObstaclePart(const FVector& RelativePosition, const FVector& Scale, UStaticMesh* StaticMesh, UMaterialInstance* MatInstance, int32 Number)
@@ -155,6 +231,10 @@ UStaticMeshComponent* ADestroyableObstacle::CreateObstaclePart(const FVector& Re
 	CubeVisual->SetStaticMesh(StaticMesh);
 	CubeVisual->SetWorldScale3D(Scale);
 	CubeVisual->SetMaterial(0, MatInstance);
+
+	// Initialize the struct for the construction of th obstacle (some values (FinalPosition and TotalTime) will be recalculated, in BeginPlay, when the values from the blueprint are known)
+	PartConstructionProgress PartConstruction(RelativePosition, RelativePosition, CubeVisual, nullptr, 1.0f);
+	ConstructionProgresses.Add(PartConstruction);
 
 	return CubeVisual;
 }

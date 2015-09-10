@@ -9,6 +9,39 @@
 class UObstacleMovementComponent;
 class UStaticMesh;
 class UMaterialInstance;
+class UStaticMeshComponent;
+
+// Helper struct which represents the construction progress of a single part
+struct PartConstructionProgress
+{
+	PartConstructionProgress(const FVector& StartPosition, const FVector& FinalPosition, UStaticMeshComponent* CubeVisual, UMaterialInstanceDynamic* MaterialInstance, float TotalTime)
+		: StartPosition(StartPosition)
+		, FinalPosition(FinalPosition)
+		, CubeVisual(CubeVisual)
+		, MaterialInstance(MaterialInstance)
+		, TotalTime(TotalTime)
+		, CurrentTime(0.0f)
+	{
+	}
+
+	/** The initial position of the obstacle part (when CurrentTime = 0.0f) */
+	FVector StartPosition;
+
+	/** The final position of the obstacle part (when CurrentTime == TotalTime) */
+	FVector FinalPosition;
+
+	/** The visual component to be animated */
+	UStaticMeshComponent* CubeVisual;
+
+	/** The dynamic material instance of the cube visual */
+	UMaterialInstanceDynamic* MaterialInstance;
+
+	/** The total time till the part is in position */
+	float TotalTime;
+
+	/** The current time of the timer which is used to interpolate between the start and the final position */
+	float CurrentTime;
+};
 
 UCLASS()
 class CUBEWARS_API ADestroyableObstacle : public AActor
@@ -28,10 +61,25 @@ public:
 	//If the actor takes damage
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser);
 
+	/** Queries whether the construction of the obstacle is in progress */
+	bool IsConstructionInProgress() const { return (ConstructionTimer < TotalConstructionTime); }
+
 	UObstacleMovementComponent* GetObstacleMovementComponent() { return MovementComponent; };
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Components)
 	UBoxComponent* BaseCollisionComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
+	float MinConstructionTime;
+
+	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
+	float MaxConstructionTime;
+
+	UPROPERTY(EditDefaultsOnly, Category = Visual)
+	float MinConstructionDistanceMultiplier;
+
+	UPROPERTY(EditDefaultsOnly, Category = Visual)
+	float MaxConstructionDistanceMultiplier;
 
 	UPROPERTY(VisibleAnywhere, Category = Gameplay)
 	int32 NumPartColumns;
@@ -61,11 +109,20 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = Components)
 	UObstacleMovementComponent* MovementComponent;
 
+	float TotalConstructionTime;
+	float ConstructionTimer;
+
+	/** Material for the parts when their spawning is over */
+	UMaterialInstance* FinalPartMaterial;
+
 	// Parts of the Obstacle that can fall off
 	TArray<UStaticMeshComponent*> FallOffParts;
 
 	// Parts of the Obstacle that can only fall off when the Obstacle is destroyed
 	TArray<UStaticMeshComponent*> FixedParts;
+
+	// Array which holds the construction progress of the individual parts of the obstacle
+	TArray<PartConstructionProgress> ConstructionProgresses;
 
 private:
 	UStaticMeshComponent* CreateObstaclePart(const FVector& RelativePosition, const FVector& Scale, UStaticMesh* StaticMesh, UMaterialInstance* MatInstance, int32 Number);
