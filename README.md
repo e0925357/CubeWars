@@ -1,7 +1,7 @@
 # CubeWars
 A little game to test the network abilities of the Unreal Engine.
 
-[CubeWars Screenshot](/Screenshots/img.png)
+[CubeWars Screenshot](/Screenshots/ScreenshotAlpha0.0.3.png)
 
 ## How to use
 You can clone the repo and open the project with the Unreal Editor. If you want to start the project from your Visual Studio environment make sure you have the Unreal Engine installed and then right click the project file *CubeWars.uproject*. Look for the "Generate Visual Studio Project Files" option and click it. Now Unreal should create your *CubeWars.sln*.
