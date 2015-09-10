@@ -19,9 +19,15 @@ public:
 	void SetTeamNumber(int32 NewTeamNumber);
 
 	int32 GetTeamNumber() const;
+
+	void AddPoints(int32 amount = 1);
+
+	int32 GetPoints();
 	
 protected:
 	UPROPERTY(Transient, Replicated)
 	int32 TeamNumber;
-	
+
+	UPROPERTY(Transient, Replicated)
+	int32 Points;
 };

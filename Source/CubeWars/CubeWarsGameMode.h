@@ -47,6 +47,11 @@ class CUBEWARS_API ACubeWarsGameMode : public AGameMode
 
 	virtual void StartMatch() override;
 
+public:
+	void playerDied(int32 team);
+
+	virtual bool IsMatchInProgress() const override;
+
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
 	TSubclassOf<AObstacle> DefaultObstacle;
@@ -63,5 +68,6 @@ protected:
 
 private:
 	float startTimer;
-	int nextSecond;
+	int32 nextSecond;
+	int32 winnerTeam;
 };

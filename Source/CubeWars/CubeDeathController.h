@@ -34,8 +34,11 @@ public:
 
 	virtual void Possess(APawn* InPawn);
 
+	void setTeamNumer(int32 teamNumber);
+
 private:
 	float breakTimer;
 	bool waiting;
+	int32 teamNumber;
 	class APlayerCube* playerCube;
 };
