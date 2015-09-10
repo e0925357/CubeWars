@@ -9,6 +9,12 @@
 
 #include "CubeWarsGameMode.generated.h"
 
+/** Possible state of the current match, where a match is all the gameplay that happens on a single map */
+namespace MatchState
+{
+	extern const FName Fight;
+}
+
 /**
  * 
  */
@@ -39,6 +45,8 @@ class CUBEWARS_API ACubeWarsGameMode : public AGameMode
 
 	virtual void Tick(float DeltaSeconds) override;
 
+	virtual void StartMatch() override;
+
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
 	TSubclassOf<AObstacle> DefaultObstacle;
@@ -49,7 +57,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
 	int32 NumObstacles;
 
+	/** The amount of time the players are allowe to move, but cannot shoot. */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
+	int32 WaitTime;
+
 private:
 	float startTimer;
-	bool bStartTimer;
+	int nextSecond;
 };

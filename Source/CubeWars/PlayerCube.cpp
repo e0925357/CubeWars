@@ -7,6 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "CubeDeathController.h"
 #include "math.h"
+#include "PlayerCubeController.h"
 
 namespace
 {
@@ -182,18 +183,22 @@ void APlayerCube::Tick( float DeltaTime )
 
 	if(Role == ROLE_Authority)
 	{
-		//Handle shooting
-		if(ShootTimer <= 0)
+		APlayerCubeController* playerCubeController = Cast<APlayerCubeController>(GetController());
+
+		if(playerCubeController == nullptr || playerCubeController->canShoot())
 		{
-			if(IsShooting)
+			//Handle shooting
+			if(ShootTimer <= 0)
 			{
-				ShootTimer = ShootDelay;
-				Shoot();
+				if(IsShooting)
+				{
+					ShootTimer = ShootDelay;
+					Shoot();
+				}
+			} else
+			{
+				ShootTimer -= DeltaTime;
 			}
-		}
-		else
-		{
-			ShootTimer -= DeltaTime;
 		}
 	}
 }
