@@ -8,6 +8,15 @@
 #include "CubeWarsGameState.h"
 #include "ObstacleMovementComponent.h"
 
+namespace
+{
+	// TODO: Remove these hardcoded teddybears and replace the with a spawn area in the editor
+	const float MinYPos = -1000.0f;
+	const float MaxYPos = 1000.0f;
+	const float MinXPos = -500.0f;
+	const float MaxXPos = 500.0f;
+}
+
 namespace MatchState
 {
 	const FName Fight = TEXT("Fight");
@@ -15,7 +24,12 @@ namespace MatchState
 
 ACubeWarsGameMode::ACubeWarsGameMode()
 	: DefaultDestroyableObstacle(ADestroyableObstacle::StaticClass())
-	, NumObstacles(3), startTimer(3.0f), nextSecond(0), WaitTime(4), winnerTeam(-1)
+	, NumObstacles(3)
+	, ObstacleRespawnTime(5.0f)
+	, WaitTime(4)
+	, startTimer(3.0f)
+	, nextSecond(0)
+	, winnerTeam(-1)
 {
 	GameStateClass = ACubeWarsGameState::StaticClass();
 	DefaultPawnClass = APlayerCube::StaticClass();
@@ -117,28 +131,9 @@ AActor* ACubeWarsGameMode::ChoosePlayerStart_Implementation(AController* Player)
 
 void ACubeWarsGameMode::HandleMatchIsWaitingToStart()
 {
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParameters.Owner = this;
-	SpawnParameters.bDeferConstruction = false;
-
-	// TODO: Remove these hardcoded teddybears and replace the with a spawn area in the editor
-	float MinYPos = -1000.0f;
-	float MaxYPos = 1000.0f;
-	float MinXPos = -500.0f;
-	float MaxXPos = 500.0f;
-
-	FRandomStream RandStream;
-	RandStream.GenerateNewSeed();
-
 	for (int32 i = 0; i < NumObstacles; ++i)
 	{
-
-		float XPos = MinXPos + (MaxXPos - MinXPos) * (static_cast<float>(i) / (NumObstacles - 1));
-		float YPos = RandStream.FRandRange(MinYPos, MaxYPos);
-
-		ADestroyableObstacle* obstacle = GetWorld()->SpawnActor<ADestroyableObstacle>(DefaultDestroyableObstacle, FVector(XPos, YPos, 90.0f), FRotator::ZeroRotator, SpawnParameters);
-		obstacle->GetObstacleMovementComponent()->MovingRight = RandStream.RandRange(0, 1) != 0;
+		SpawnObstacle(i);
 	}
 }
 
@@ -181,7 +176,28 @@ void ACubeWarsGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if(GetMatchState() == MatchState::InProgress)
+	if (GetMatchState() == MatchState::Fight)
+	{
+		// Tick code to call when fighting
+
+		// Update respawn of obstacles
+		for (int32 i = 0; i < ObstacleRespawnArray.Num();)
+		{
+			ObstacleRespawner& Respawner = ObstacleRespawnArray[i];
+			Respawner.Timer += DeltaSeconds;
+
+			if (Respawner.Timer >= ObstacleRespawnTime)
+			{
+				SpawnObstacle(Respawner.ObstacleIndex);
+				ObstacleRespawnArray.RemoveAt(i);
+			}
+			else
+			{
+				++i;
+			}
+		}
+	}
+	else if(GetMatchState() == MatchState::InProgress)
 	{
 		startTimer -= DeltaSeconds;
 
@@ -327,4 +343,36 @@ void ACubeWarsGameMode::playerDied(int32 team)
 			cwPlayerState->AddPoints();
 		}
 	}
+}
+
+void ACubeWarsGameMode::ObstacleDied(int32 ObstacleIndex)
+{
+	// First check whether the obstacle is already respawning
+	for (int32 i = 0; i < ObstacleRespawnArray.Num(); ++i)
+	{
+		if (ObstacleRespawnArray[i].ObstacleIndex == ObstacleIndex)
+		{
+			return;
+		}
+	}
+
+	ObstacleRespawnArray.Add(ObstacleRespawner(ObstacleIndex));
+}
+
+void ACubeWarsGameMode::SpawnObstacle(int32 ObstacleIndex)
+{
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParameters.Owner = this;
+	SpawnParameters.bDeferConstruction = false;
+
+	FRandomStream RandStream;
+	RandStream.GenerateNewSeed();
+
+	float XPos = MinXPos + (MaxXPos - MinXPos) * (static_cast<float>(ObstacleIndex) / (NumObstacles - 1));
+	float YPos = RandStream.FRandRange(MinYPos, MaxYPos);
+
+	ADestroyableObstacle* obstacle = GetWorld()->SpawnActor<ADestroyableObstacle>(DefaultDestroyableObstacle, FVector(XPos, YPos, 90.0f), FRotator::ZeroRotator, SpawnParameters);
+	obstacle->SetObstacleIndex(ObstacleIndex);
+	obstacle->GetObstacleMovementComponent()->SetMovingRightMulticast(RandStream.RandRange(0, 1) != 0);
 }

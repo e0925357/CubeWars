@@ -62,3 +62,8 @@ void UObstacleMovementComponent::TickComponent(float DeltaTime, enum ELevelTick 
 
 	UpdateComponentVelocity();
 }
+
+void UObstacleMovementComponent::SetMovingRightMulticast_Implementation(bool NewMovingRight)
+{
+	MovingRight = NewMovingRight;
+}

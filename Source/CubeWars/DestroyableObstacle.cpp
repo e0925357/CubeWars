@@ -5,6 +5,7 @@
 #include "CubeDebris.h"
 #include "ObstacleMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "CubeWarsGameMode.h"
 
 namespace {
 	const FVector CUBE_DIMENSIONS(20.0f, 20.0f, 20.0f);
@@ -180,6 +181,15 @@ void ADestroyableObstacle::Tick( float DeltaTime )
 			MaterialInstance->SetScalarParameterValue("Opacity", NewOpacity);
 		}
 
+	}
+}
+
+void ADestroyableObstacle::Destroyed()
+{
+	ACubeWarsGameMode* cwgm = GetWorld()->GetAuthGameMode<ACubeWarsGameMode>();
+	if (cwgm)
+	{
+		cwgm->ObstacleDied(ObstacleIndex);
 	}
 }
 

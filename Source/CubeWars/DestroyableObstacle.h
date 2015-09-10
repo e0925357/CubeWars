@@ -58,8 +58,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 
+	/** Called once this actor has been deleted */
+	virtual void Destroyed() override;
+
 	//If the actor takes damage
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser);
+
+	/** Sets the index of this obstacle */
+	void SetObstacleIndex(int NewObstacleIndex) { ObstacleIndex = NewObstacleIndex; }
 
 	/** Queries whether the construction of the obstacle is in progress */
 	bool IsConstructionInProgress() const { return (ConstructionTimer < TotalConstructionTime); }
@@ -111,6 +117,9 @@ protected:
 
 	float TotalConstructionTime;
 	float ConstructionTimer;
+
+	/** Index of the obstacle. Caution: This index only has the valid index on the server! */
+	int ObstacleIndex;
 
 	/** Material for the parts when their spawning is over */
 	UMaterialInstance* FinalPartMaterial;

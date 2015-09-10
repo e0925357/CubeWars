@@ -15,6 +15,19 @@ namespace MatchState
 	extern const FName Fight;
 }
 
+/** Struct used to respawn an obstacle */
+struct ObstacleRespawner
+{
+	ObstacleRespawner(int32 Index)
+		: ObstacleIndex(Index)
+		, Timer(0.0f)
+	{
+	}
+
+	int32 ObstacleIndex;
+	float Timer;
+};
+
 /**
  * 
  */
@@ -52,6 +65,9 @@ public:
 
 	virtual bool IsMatchInProgress() const override;
 
+	/** Called by the dying obstacle in order to spawn a new obstacle with its index after some time. */
+	void ObstacleDied(int32 ObstacleIndex);
+
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
 	TSubclassOf<AObstacle> DefaultObstacle;
@@ -62,12 +78,19 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
 	int32 NumObstacles;
 
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
+	float ObstacleRespawnTime;
+
 	/** The amount of time the players are allowe to move, but cannot shoot. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
 	int32 WaitTime;
+
+	void SpawnObstacle(int32 ObstacleIndex);
 
 private:
 	float startTimer;
 	int32 nextSecond;
 	int32 winnerTeam;
+
+	TArray<ObstacleRespawner> ObstacleRespawnArray;
 };

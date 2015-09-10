@@ -18,6 +18,10 @@ public:
 	
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
+	/** Multicast version of Setter whether the obstacle moves right or not */
+	UFUNCTION(NetMulticast, reliable)
+	void SetMovingRightMulticast(bool NewMovingRight);
+
 	UPROPERTY(EditAnywhere, Category = Gameplay)
 	float LeftMovementTarget;
 
