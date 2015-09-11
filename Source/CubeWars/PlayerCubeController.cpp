@@ -2,6 +2,8 @@
 
 #include "CubeWars.h"
 #include "PlayerCubeController.h"
+#include "CubeWarsPlayerState.h"
+#include "CubeWarsGameMode.h"
 
 
 void APlayerCubeController::setCanShoot(bool bCanShoot)
@@ -25,3 +27,43 @@ bool APlayerCubeController::canShoot()
 {
 	return bCanShoot;
 }
+
+void APlayerCubeController::matchEnded_Implementation(const FString& player1Name, int32 player1Points, const FString& player2Name, int32 player2Points, bool hasWon)
+{
+	OnMatchEnded(player1Name, player1Points, player2Name, player2Points, hasWon);
+}
+
+void APlayerCubeController::BPRequestRestart()
+{
+	ServerRequestRestart();
+}
+
+void APlayerCubeController::ServerRequestRestart_Implementation()
+{
+	int32 team = 0;
+
+	ACubeWarsPlayerState* state = Cast<ACubeWarsPlayerState>(PlayerState);
+
+	if(state != nullptr)
+	{
+		team = state->GetTeamNumber();
+	}
+
+	ACubeWarsGameMode* gameMode = GetWorld()->GetAuthGameMode<ACubeWarsGameMode>();
+	
+	if(gameMode != nullptr)
+	{
+		gameMode->requestRematch(team);
+	}
+}
+
+bool APlayerCubeController::ServerRequestRestart_Validate()
+{
+	return true;
+}
+
+void APlayerCubeController::MatchRestarted_Implementation()
+{
+	OnMatchRestart();
+}
+

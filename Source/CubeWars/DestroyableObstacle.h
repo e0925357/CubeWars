@@ -65,7 +65,10 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser);
 
 	/** Sets the index of this obstacle */
-	void SetObstacleIndex(int NewObstacleIndex) { ObstacleIndex = NewObstacleIndex; }
+	void SetObstacleIndex(int32 NewObstacleIndex) { ObstacleIndex = NewObstacleIndex; }
+
+	/** Gets the index of this obstacle */
+	int32 GetObstacleIndex() { return ObstacleIndex; }
 
 	/** Queries whether the construction of the obstacle is in progress */
 	bool IsConstructionInProgress() const { return (ConstructionTimer < TotalConstructionTime); }
@@ -119,7 +122,7 @@ protected:
 	float ConstructionTimer;
 
 	/** Index of the obstacle. Caution: This index only has the valid index on the server! */
-	int ObstacleIndex;
+	int32 ObstacleIndex;
 
 	/** Material for the parts when their spawning is over */
 	UMaterialInstance* FinalPartMaterial;

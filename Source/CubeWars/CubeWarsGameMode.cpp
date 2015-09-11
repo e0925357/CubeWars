@@ -30,6 +30,8 @@ ACubeWarsGameMode::ACubeWarsGameMode()
 	, startTimer(3.0f)
 	, nextSecond(0)
 	, winnerTeam(-1)
+	, firstPlayerRematch(false)
+	, secondPlayerRematch(false)
 {
 	GameStateClass = ACubeWarsGameState::StaticClass();
 	DefaultPawnClass = APlayerCube::StaticClass();
@@ -54,23 +56,47 @@ void ACubeWarsGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	ACubeWarsPlayerState* NewPlayerState = CastChecked<ACubeWarsPlayerState>(NewPlayer->PlayerState);
+	//Determine the team this player will be on
+	bool foundTeam1 = false;
+	bool foundTeam2 = false;
 
-	switch (GameState->PlayerArray.Num())
+	for(FConstPlayerControllerIterator iter = GetWorld()->GetPlayerControllerIterator(); iter; ++iter)
 	{
-		case 0:
+		APlayerController* playerController = *iter;
+		ACubeWarsPlayerState* cwPlayerState = Cast<ACubeWarsPlayerState>(playerController->PlayerState);
+
+		if(cwPlayerState != nullptr)
 		{
-			NewPlayerState->SetTeamNumber(1);
-			break;
+			switch(cwPlayerState->GetTeamNumber())
+			{
+			case 1:
+				foundTeam1 = true;
+				break;
+			case 2:
+				foundTeam2 = true;
+				break;
+			}
 		}
-		case 1:
+	}
+
+	if(!foundTeam1)
+	{
+		//Make him a member of team 1
+		ACubeWarsPlayerState* cwPlayerState = Cast<ACubeWarsPlayerState>(NewPlayer->PlayerState);
+
+		if(cwPlayerState != nullptr)
 		{
-			NewPlayerState->SetTeamNumber(2);
-			break;
+			cwPlayerState->SetTeamNumber(1);
 		}
-		default:
+	}
+	else if(!foundTeam2)
+	{
+		//Make him a member of team 1
+		ACubeWarsPlayerState* cwPlayerState = Cast<ACubeWarsPlayerState>(NewPlayer->PlayerState);
+
+		if(cwPlayerState != nullptr)
 		{
-			// TODO: Thou shall not happen and is prevented in PreLogin
+			cwPlayerState->SetTeamNumber(2);
 		}
 	}
 }
@@ -131,6 +157,11 @@ AActor* ACubeWarsGameMode::ChoosePlayerStart_Implementation(AController* Player)
 
 void ACubeWarsGameMode::HandleMatchIsWaitingToStart()
 {
+	//Reset rematch-requests
+	firstPlayerRematch = false;
+	secondPlayerRematch = false;
+
+	//Create obstacles
 	for (int32 i = 0; i < NumObstacles; ++i)
 	{
 		SpawnObstacle(i);
@@ -334,13 +365,100 @@ void ACubeWarsGameMode::playerDied(int32 team)
 	}
 
 	//Add a point to the winning team
-	for(APlayerState* playerState: GameState->PlayerArray)
+	for(FConstPlayerControllerIterator iter = GetWorld()->GetPlayerControllerIterator(); iter; ++iter)
 	{
-		ACubeWarsPlayerState* cwPlayerState = Cast<ACubeWarsPlayerState>(playerState);
+		APlayerController* playerController = *iter;
+		ACubeWarsPlayerState* cwPlayerState = Cast<ACubeWarsPlayerState>(playerController->PlayerState);
 
 		if(cwPlayerState != nullptr && cwPlayerState->GetTeamNumber() == winnerTeam)
 		{
 			cwPlayerState->AddPoints();
+		}
+	}
+}
+
+void ACubeWarsGameMode::HandleMatchHasEnded()
+{
+	Super::HandleMatchHasEnded();
+
+	//TODO: unposess old pawn, create & posses orbiting spectators
+
+	UWorld* world = GetWorld();
+
+	if(world == nullptr)
+	{
+		return;
+	}
+
+	FString player1Name = TEXT("Player 1");
+	FString player2Name = TEXT("Player 2");
+	int32 player1Points = 0;
+	int32 player2Points = 0;
+
+	int32 currentPlayerIndex = 0;
+
+	//Gather data
+	for(FConstPlayerControllerIterator iter = world->GetPlayerControllerIterator(); iter; ++iter, ++currentPlayerIndex)
+	{
+		APlayerController* playerController = *iter;
+
+		APlayerCubeController* playerCubeController = Cast<APlayerCubeController>(playerController);
+
+		if(playerCubeController != nullptr)
+		{
+			//Get player Name
+			if(!playerCubeController->playerName.IsEmpty())
+			{
+				switch(currentPlayerIndex)
+				{
+				case 0:
+					player1Name = playerCubeController->playerName;
+					break;
+
+				case 1:
+					player2Name = playerCubeController->playerName;
+					break;
+				}
+			}
+
+			//Get points
+			ACubeWarsPlayerState* playerState = Cast<ACubeWarsPlayerState>(playerCubeController->PlayerState);
+
+			if(playerState != nullptr)
+			{
+				switch(currentPlayerIndex)
+				{
+				case 0:
+					player1Points = playerState->GetPoints();
+					break;
+
+				case 1:
+					player2Points = playerState->GetPoints();
+					break;
+				}
+			}
+		}
+	}
+
+	//Show off the winner
+	for(FConstPlayerControllerIterator iter = world->GetPlayerControllerIterator(); iter; ++iter)
+	{
+		APlayerController* playerController = *iter;
+
+		APlayerCubeController* playerCubeController = Cast<APlayerCubeController>(playerController);
+
+		bool hasWon = false;
+
+		if(playerCubeController != nullptr)
+		{
+			ACubeWarsPlayerState* playerState = Cast<ACubeWarsPlayerState>(playerCubeController->PlayerState);
+
+			if(playerState != nullptr)
+			{
+				hasWon = winnerTeam == playerState->GetTeamNumber();
+			}
+
+			playerCubeController->matchEnded(player1Name, player1Points, player2Name, player2Points, hasWon);
 		}
 	}
 }
@@ -357,6 +475,16 @@ void ACubeWarsGameMode::ObstacleDied(int32 ObstacleIndex)
 	}
 
 	ObstacleRespawnArray.Add(ObstacleRespawner(ObstacleIndex));
+
+	//Remove it from the active obstacles list
+	for(int32 i = 0; i < ObstacleArray.Num(); ++i)
+	{
+		if(ObstacleArray[i]->GetObstacleIndex() == ObstacleIndex)
+		{
+			ObstacleArray.RemoveAt(i);
+			break;
+		}
+	}
 }
 
 void ACubeWarsGameMode::SpawnObstacle(int32 ObstacleIndex)
@@ -375,4 +503,53 @@ void ACubeWarsGameMode::SpawnObstacle(int32 ObstacleIndex)
 	ADestroyableObstacle* obstacle = GetWorld()->SpawnActor<ADestroyableObstacle>(DefaultDestroyableObstacle, FVector(XPos, YPos, 90.0f), FRotator::ZeroRotator, SpawnParameters);
 	obstacle->SetObstacleIndex(ObstacleIndex);
 	obstacle->GetObstacleMovementComponent()->SetMovingRightMulticast(RandStream.RandRange(0, 1) != 0);
+
+	ObstacleArray.Add(obstacle);
+}
+
+void ACubeWarsGameMode::requestRematch(int32 team)
+{
+	if(team == 1)
+	{
+		firstPlayerRematch = true;
+	}
+	else if(team == 2)
+	{
+		secondPlayerRematch = true;
+	}
+
+	if(firstPlayerRematch && secondPlayerRematch)
+	{
+		//*** Restart Level
+		//Remove all obstacles
+		for(int32 i = 0; i < ObstacleArray.Num(); ++i)
+		{
+			ObstacleArray[i]->Destroy();
+		}
+
+		ObstacleArray.Empty();
+		ObstacleRespawnArray.Empty();
+
+		//Remove all pawns & notify them that the game restarts now
+		for(FConstPlayerControllerIterator iter = GetWorld()->GetPlayerControllerIterator(); iter; ++iter)
+		{
+			APlayerController* playerController = *iter;
+
+			APawn* controlledPawn = playerController->GetPawn();
+
+			if(controlledPawn->IsValidLowLevel())
+			{
+				controlledPawn->Destroy();
+			}
+
+			APlayerCubeController* playerCubeController = Cast<APlayerCubeController>(playerController);
+
+			if(playerCubeController != nullptr)
+			{
+				playerCubeController->MatchRestarted();
+			}
+		}
+
+		SetMatchState(MatchState::WaitingToStart);
+	}
 }

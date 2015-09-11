@@ -60,6 +60,8 @@ class CUBEWARS_API ACubeWarsGameMode : public AGameMode
 
 	virtual void StartMatch() override;
 
+	virtual void HandleMatchHasEnded() override;
+
 public:
 	void playerDied(int32 team);
 
@@ -67,6 +69,8 @@ public:
 
 	/** Called by the dying obstacle in order to spawn a new obstacle with its index after some time. */
 	void ObstacleDied(int32 ObstacleIndex);
+
+	void requestRematch(int32 team);
 
 protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
@@ -93,4 +97,7 @@ private:
 	int32 winnerTeam;
 
 	TArray<ObstacleRespawner> ObstacleRespawnArray;
+	TArray<ADestroyableObstacle*> ObstacleArray;
+	bool firstPlayerRematch;
+	bool secondPlayerRematch;
 };
