@@ -27,6 +27,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnShowFullscreenMessage(const FString& text);
 
+	UPROPERTY(BlueprintReadWrite)
+	FString playerName;
+
 private:
 	bool bCanShoot;
 	
