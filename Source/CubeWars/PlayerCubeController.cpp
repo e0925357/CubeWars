@@ -67,3 +67,25 @@ void APlayerCubeController::MatchRestarted_Implementation()
 	OnMatchRestart();
 }
 
+void APlayerCubeController::setPlayerNameBP(const FString& name)
+{
+	playerName = name;
+
+	setPlayerNameServer(name);
+}
+
+void APlayerCubeController::setPlayerNameServer_Implementation(const FString& name)
+{
+	playerName = name;
+}
+
+bool APlayerCubeController::setPlayerNameServer_Validate(const FString& name)
+{
+	return true;
+}
+
+const FString& APlayerCubeController::getPlayerName()
+{
+	return playerName;
+}
+

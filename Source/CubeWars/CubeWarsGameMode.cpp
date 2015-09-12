@@ -407,16 +407,16 @@ void ACubeWarsGameMode::HandleMatchHasEnded()
 		if(playerCubeController != nullptr)
 		{
 			//Get player Name
-			if(!playerCubeController->playerName.IsEmpty())
+			if(!playerCubeController->getPlayerName().IsEmpty())
 			{
 				switch(currentPlayerIndex)
 				{
 				case 0:
-					player1Name = playerCubeController->playerName;
+					player1Name = playerCubeController->getPlayerName();
 					break;
 
 				case 1:
-					player2Name = playerCubeController->playerName;
+					player2Name = playerCubeController->getPlayerName();
 					break;
 				}
 			}

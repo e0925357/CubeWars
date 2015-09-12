@@ -45,10 +45,17 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnMatchRestart();
 
-	UPROPERTY(BlueprintReadWrite)
-	FString playerName;
+	UFUNCTION(BlueprintCallable, Category = Stats)
+	void setPlayerNameBP(const FString& name);
+
+	UFUNCTION(Server, WithValidation, reliable)
+	void setPlayerNameServer(const FString& name);
+
+	const FString& getPlayerName();
 
 private:
 	bool bCanShoot;
 	
+	UPROPERTY()
+	FString playerName;
 };
