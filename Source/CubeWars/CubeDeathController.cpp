@@ -11,7 +11,7 @@
 
 ACubeDeathController::ACubeDeathController()
 	: targetHeight(300)
-	, breakTime(2)
+	, breakTime(1)
 	, breakTimer(0)
 	, waiting(false)
 	, explosionForce(5000)

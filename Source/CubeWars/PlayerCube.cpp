@@ -445,7 +445,7 @@ void APlayerCube::startRaising(float targetHeight)
 	this->targetHeight = targetHeight;
 	raisingState = 1;
 	CubeMovement->StartJitter();
-	CubeMovement->SetSpeed(20.0f);
+	CubeMovement->SetSpeed(50.0f);
 
 	startRaising_Client();
 }
