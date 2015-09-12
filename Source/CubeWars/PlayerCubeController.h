@@ -53,6 +53,12 @@ public:
 
 	const FString& getPlayerName();
 
+	UFUNCTION(Client, reliable)
+	void ClientRequestRestart();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnRequestRestart();
+
 private:
 	bool bCanShoot;
 	

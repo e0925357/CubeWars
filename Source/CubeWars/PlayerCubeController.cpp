@@ -89,3 +89,8 @@ const FString& APlayerCubeController::getPlayerName()
 	return playerName;
 }
 
+void APlayerCubeController::ClientRequestRestart_Implementation()
+{
+	OnRequestRestart();
+}
+

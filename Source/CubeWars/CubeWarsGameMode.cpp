@@ -518,6 +518,22 @@ void ACubeWarsGameMode::requestRematch(int32 team)
 		secondPlayerRematch = true;
 	}
 
+	if((firstPlayerRematch || secondPlayerRematch) && (firstPlayerRematch != secondPlayerRematch))
+	{
+		//Show off the winner
+		for(FConstPlayerControllerIterator iter = GetWorld()->GetPlayerControllerIterator(); iter; ++iter)
+		{
+			APlayerController* playerController = *iter;
+
+			APlayerCubeController* playerCubeController = Cast<APlayerCubeController>(playerController);
+
+			if(playerCubeController != nullptr)
+			{
+				playerCubeController->ClientRequestRestart();
+			}
+		}
+	}
+
 	if(firstPlayerRematch && secondPlayerRematch)
 	{
 		//*** Restart Level
