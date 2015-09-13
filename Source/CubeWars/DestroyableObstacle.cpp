@@ -143,6 +143,9 @@ void ADestroyableObstacle::BeginPlay()
 // Called every frame
 void ADestroyableObstacle::Tick( float DeltaTime )
 {
+	if(!this->IsValidLowLevel() || IsActorBeingDestroyed())
+		return;
+
 	Super::Tick( DeltaTime );
 
 	for (int32 i = 0; i < ConstructionProgresses.Num();)
