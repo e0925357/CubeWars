@@ -7,6 +7,7 @@
 #include "CubeWarsPlayerState.h"
 #include "CubeWarsGameState.h"
 #include "ObstacleMovementComponent.h"
+#include "OrbitingPawn.h"
 
 namespace
 {
@@ -381,8 +382,6 @@ void ACubeWarsGameMode::HandleMatchHasEnded()
 {
 	Super::HandleMatchHasEnded();
 
-	//TODO: unposess old pawn, create & posses orbiting spectators
-
 	UWorld* world = GetWorld();
 
 	if(world == nullptr)
@@ -394,11 +393,11 @@ void ACubeWarsGameMode::HandleMatchHasEnded()
 	FString player2Name = TEXT("Player 2");
 	int32 player1Points = 0;
 	int32 player2Points = 0;
-
-	int32 currentPlayerIndex = 0;
+	const FVector OrbitCenter(0.0f, 0.0f, 250.0f);
+	const FVector OrbitCamOffset(650.0f, 0.0f, 250.0f);
 
 	//Gather data
-	for(FConstPlayerControllerIterator iter = world->GetPlayerControllerIterator(); iter; ++iter, ++currentPlayerIndex)
+	for(FConstPlayerControllerIterator iter = world->GetPlayerControllerIterator(); iter; ++iter)
 	{
 		APlayerController* playerController = *iter;
 
@@ -406,35 +405,48 @@ void ACubeWarsGameMode::HandleMatchHasEnded()
 
 		if(playerCubeController != nullptr)
 		{
-			//Get player Name
-			if(!playerCubeController->getPlayerName().IsEmpty())
-			{
-				switch(currentPlayerIndex)
-				{
-				case 0:
-					player1Name = playerCubeController->getPlayerName();
-					break;
-
-				case 1:
-					player2Name = playerCubeController->getPlayerName();
-					break;
-				}
-			}
-
-			//Get points
 			ACubeWarsPlayerState* playerState = Cast<ACubeWarsPlayerState>(playerCubeController->PlayerState);
 
 			if(playerState != nullptr)
 			{
-				switch(currentPlayerIndex)
+				int32 playerTeam = playerState->GetTeamNumber();
+
+				//unpossess old pawn, create & possess orbiting spectators
+				if(playerCubeController->GetPawn()->IsValidLowLevel())
+					ActorsToRemove.Add(playerCubeController->GetPawn());
+
+				playerCubeController->UnPossess();
+
+				AOrbitingPawn* orbitingPawn = GetWorld()->SpawnActor<AOrbitingPawn>(AOrbitingPawn::StaticClass());
+				orbitingPawn->SetupOrbitMulticast(OrbitCenter, 1500.0f, 3.0f);
+
+				playerCubeController->Possess(orbitingPawn);
+
+				//Get points
+				switch(playerTeam)
 				{
-				case 0:
+				case 1:
 					player1Points = playerState->GetPoints();
 					break;
 
-				case 1:
+				case 2:
 					player2Points = playerState->GetPoints();
 					break;
+				}
+
+				//Get player Name
+				if(!playerCubeController->getPlayerName().IsEmpty())
+				{
+					switch(playerTeam)
+					{
+					case 1:
+						player1Name = playerCubeController->getPlayerName();
+						break;
+
+					case 2:
+						player2Name = playerCubeController->getPlayerName();
+						break;
+					}
 				}
 			}
 		}
@@ -543,8 +555,15 @@ void ACubeWarsGameMode::requestRematch(int32 team)
 			ObstacleArray[i]->Destroy();
 		}
 
+		//Remove marked actors
+		for(int32 i = 0; i < ActorsToRemove.Num(); i++)
+		{
+			ActorsToRemove[i]->Destroy();
+		}
+
 		ObstacleArray.Empty();
 		ObstacleRespawnArray.Empty();
+		ActorsToRemove.Empty();
 
 		//Remove all pawns & notify them that the game restarts now
 		for(FConstPlayerControllerIterator iter = GetWorld()->GetPlayerControllerIterator(); iter; ++iter)

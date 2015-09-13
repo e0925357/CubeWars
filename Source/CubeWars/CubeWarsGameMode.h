@@ -98,6 +98,7 @@ private:
 
 	TArray<ObstacleRespawner> ObstacleRespawnArray;
 	TArray<ADestroyableObstacle*> ObstacleArray;
+	TArray<AActor*> ActorsToRemove;
 	bool firstPlayerRematch;
 	bool secondPlayerRematch;
 };

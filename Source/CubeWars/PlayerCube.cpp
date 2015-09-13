@@ -9,6 +9,7 @@
 #include "math.h"
 #include "PlayerCubeController.h"
 #include "CubeWarsPlayerState.h"
+#include "OrbitingPawn.h"
 
 namespace
 {
@@ -252,6 +253,7 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 		IsShooting = false;
 
 		int32 teamNumber = Cast<ACubeWarsPlayerState>(GetController()->PlayerState)->GetTeamNumber();
+		APlayerController* playerController = CastChecked<APlayerController>(GetController());
 		GetController()->UnPossess();
 		
 		FActorSpawnParameters SpawnInfo;
@@ -260,6 +262,7 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 		SpawnInfo.OverrideLevel = GetLevel();
 		SpawnInfo.ObjectFlags |= RF_Transient;	// We never want to save AI controllers into a map
 		ACubeDeathController* NewController = GetWorld()->SpawnActor<ACubeDeathController>(ACubeDeathController::StaticClass(), GetActorLocation(), GetActorRotation(), SpawnInfo);
+		
 		if(NewController != nullptr)
 		{
 			// if successful will result in setting this->Controller 
@@ -267,6 +270,11 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 			NewController->Possess(this);
 			NewController->setTeamNumer(teamNumber);
 		}
+
+		//Possess an orbiting camera-pawn
+		AOrbitingPawn* orbitingPawn = GetWorld()->SpawnActor<AOrbitingPawn>(AOrbitingPawn::StaticClass());
+		orbitingPawn->SetupOrbit(GetActorLocation() + FVector(0.0f, 0.0f, 200.0f), 500.0f, 15.0f);
+		playerController->Possess(orbitingPawn);
 
 		bReplicateMovement = true;
 	}
