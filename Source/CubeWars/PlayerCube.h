@@ -5,6 +5,8 @@
 #include "GameFramework/Pawn.h"
 #include "PlayerCube.generated.h"
 
+class APowerUp;
+
 UCLASS()
 class CUBEWARS_API APlayerCube : public APawn
 {
@@ -27,7 +29,7 @@ public:
 	virtual UPawnMovementComponent* GetMovementComponent() const override;
 
 	//If the actor takes damage
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser);
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
 
 	//Tells the cube to start rising into the air!
 	void startRaising(float targetHeight);
@@ -42,6 +44,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	UMaterialInterface* hitDecalMaterial;
+
+	UFUNCTION(NetMulticast, reliable)
+	void SetPowerUp(int32 GUID);
+
+	void SetPowerUp(APowerUp* PowerUp);
 
 protected:
 
@@ -137,7 +144,7 @@ protected:
 	UFUNCTION()
 	void OnRep_RotChange();
 
-	UPROPERTY(Replicated, VisibleAnywhere, Category = Components)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = Components)
 	class UPlayerCubeMovementComponent* CubeMovement;
 
 	float targetHeight;
@@ -148,10 +155,12 @@ protected:
 	// Components & Visuals
 	//---------------------------------------------------------------------------------------------
 
-	UPROPERTY(VisibleAnywhere, Category = Components)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components)
 	UStaticMeshComponent* CubeVisual;
 	
 	/** Projectile class to spawn */
 	UPROPERTY(EditAnywhere, Category = Projectile)
 	TSubclassOf<class AProjectile> ProjectileClass;
+
+	APowerUp* PowerUp;
 };

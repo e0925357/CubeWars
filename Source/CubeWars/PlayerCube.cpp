@@ -10,6 +10,7 @@
 #include "PlayerCubeController.h"
 #include "CubeWarsPlayerState.h"
 #include "OrbitingPawn.h"
+#include "PowerUp.h"
 
 namespace
 {
@@ -202,13 +203,26 @@ void APlayerCube::Tick( float DeltaTime )
 				ShootTimer -= DeltaTime;
 			}
 		}
+
+		//Handle PowerUp
+		if(PowerUp != nullptr)
+		{
+			PowerUp->Tick(DeltaTime);
+
+			if(!PowerUp->IsAlive())
+			{
+				PowerUp->Detach();
+				PowerUp->Destroy();
+				PowerUp = nullptr;
+			}
+		}
 	}
 }
 
 void APlayerCube::Shoot()
 {
 	// try and fire a projectile
-	if(ProjectileClass != nullptr)
+	if(ProjectileClass != nullptr && (PowerUp == nullptr || !PowerUp->IsAlive() || !PowerUp->OnShoot()))
 	{
 		const FRotator SpawnRotation = GetActorRotation();
 		// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
@@ -222,6 +236,7 @@ void APlayerCube::Shoot()
 			AProjectile* projectile = World->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
 
 			projectile->hitDecalMaterial = hitDecalMaterial;
+			projectile->SetInstigator(GetController());
 		}
 	}
 
@@ -230,6 +245,11 @@ void APlayerCube::Shoot()
 
 void APlayerCube::ShootOnClient_Implementation()
 {
+	if(PowerUp != nullptr && PowerUp->IsAlive() && PowerUp->OnShootClient())
+	{
+		return;
+	}
+
 	// try and play the sound if specified
 	if(FireSound != nullptr)
 	{
@@ -241,12 +261,28 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	if(Role != ROLE_Authority)
+	{
+		return DamageAmount;
+	}
+
 	if(Health <= 0)
 	{
 		return 0;
 	}
 
-	Health -= DamageAmount;
+	float ModifiedDamageAmount;
+
+	if(PowerUp == nullptr || !PowerUp->IsAlive())
+	{
+		ModifiedDamageAmount = DamageAmount;
+	}
+	else
+	{
+		ModifiedDamageAmount = PowerUp->OnTakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	}
+
+	Health -= ModifiedDamageAmount;
 
 	if(Health <= 0)
 	{
@@ -286,18 +322,23 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 
 void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, float newHealth, AActor* DamageCauser)
 {
+	Health = newHealth;
+
+	HealthChanged();
+
+	if(PowerUp->IsValidLowLevel() && !PowerUp->IsAlive() && PowerUp->OnTakeDamageClient(DamageCauser))
+	{
+		return;
+	}
+
+	if(hitDecalMaterial && DamageCauser)
+		UGameplayStatics::SpawnDecalAttached(hitDecalMaterial, FVector(10, 10, 20), RootComponent, NAME_None, DamageCauser->GetActorLocation(), FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
+
 	// try and play the sound if specified
 	if(DamageSound != nullptr)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, DamageSound, GetActorLocation());
 	}
-
-	if(hitDecalMaterial && DamageCauser)
-		UGameplayStatics::SpawnDecalAttached(hitDecalMaterial, FVector(10, 10, 20), RootComponent, NAME_None, DamageCauser->GetActorLocation(), FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
-	
-	Health = newHealth;
-
-	HealthChanged();
 }
 
 // Called to bind functionality to input
@@ -514,4 +555,39 @@ void APlayerCube::CreateShockWave_Implementation()
 	
 	SpawnShockwave(ShockwaveParticleSystem, *this, FVector(0, 3.3333f, 0), FRotator(0, 90, 0));
 	SpawnShockwave(ShockwaveParticleSystem, *this, FVector(0, -3.3333f, 0), FRotator(0, 90, 0));
+}
+
+void APlayerCube::SetPowerUp(APowerUp* PowerUp)
+{
+	if(this->PowerUp->IsValidLowLevel())
+	{
+		if(Role == ROLE_Authority)
+		{
+			this->PowerUp->Detach();
+		}
+
+		this->PowerUp->Destroy();
+	}
+
+	this->PowerUp = PowerUp;
+
+	PowerUp->OnAttach(this);
+}
+
+void APlayerCube::SetPowerUp_Implementation(int32 GUID)
+{
+	if(GUID > -1)
+	{
+		//Find the Actor
+		for(TActorIterator<APowerUp> Iter(GetWorld(), APowerUp::StaticClass()); Iter; ++Iter)
+		{
+			APowerUp* powerUp = *Iter;
+
+			if(powerUp->GetGUID() == GUID)
+			{
+				SetPowerUp(powerUp);
+				break;
+			}
+		}
+	}
 }

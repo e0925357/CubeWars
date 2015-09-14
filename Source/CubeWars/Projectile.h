@@ -39,10 +39,14 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<ACubeDebris> DebrisClass;
 
+	void SetInstigator(AController* Instigator);
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category = Components)
 	class UProjectileMovementComponent* movementComponent;
+
+	AController* Instigator;
 
 	//---------------------------------------------------------------------------------------------
 	// Components & Visuals

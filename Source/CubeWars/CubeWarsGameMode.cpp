@@ -33,6 +33,10 @@ ACubeWarsGameMode::ACubeWarsGameMode()
 	, winnerTeam(-1)
 	, firstPlayerRematch(false)
 	, secondPlayerRematch(false)
+	, PickupRespawnTime(15.0f)
+	, PickupClass(APickup::StaticClass())
+	, pickupRespawnTimer(30.0f)
+	, nextGUID(0)
 {
 	GameStateClass = ACubeWarsGameState::StaticClass();
 	DefaultPawnClass = APlayerCube::StaticClass();
@@ -167,6 +171,8 @@ void ACubeWarsGameMode::HandleMatchIsWaitingToStart()
 	{
 		SpawnObstacle(i);
 	}
+
+	pickupRespawnTimer = PickupRespawnTime;
 }
 
 /** @return True if ready to Start Match. Games should override this */
@@ -227,6 +233,15 @@ void ACubeWarsGameMode::Tick(float DeltaSeconds)
 			{
 				++i;
 			}
+		}
+
+		//Update pickup-spawning
+		pickupRespawnTimer -= DeltaSeconds;
+
+		if(pickupRespawnTimer < 0.0f)
+		{
+			pickupRespawnTimer = PickupRespawnTime;
+			SpawnPickup();
 		}
 	}
 	else if(GetMatchState() == MatchState::InProgress)
@@ -587,4 +602,59 @@ void ACubeWarsGameMode::requestRematch(int32 team)
 
 		SetMatchState(MatchState::WaitingToStart);
 	}
+}
+
+void ACubeWarsGameMode::SpawnPickup()
+{
+	if(PowerUpClasses.Num() == 0 || PowerUpSpawnWeights.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Pickups specified - can't spawn Pickups!"));
+		return;
+	}
+
+	if(PowerUpClasses.Num() != PowerUpSpawnWeights.Num())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PowerUpClasses and PowerUpSpawnWeights differ in size - can't spawn Pickups!"));
+		return;
+	}
+
+	int32 weightSum = 0;
+
+	for(int32 i = 0; i < PowerUpSpawnWeights.Num(); i++)
+	{
+		weightSum += PowerUpSpawnWeights[i];
+	}
+
+	FRandomStream RandStream;
+	RandStream.GenerateNewSeed();
+
+	int32 randomNumber = RandStream.RandRange(0, weightSum);
+	TSubclassOf<APowerUp> chosenPowerup;
+	weightSum = 0;
+
+	for(int32 i = 0; i < PowerUpSpawnWeights.Num(); i++)
+	{
+		weightSum += PowerUpSpawnWeights[i];
+
+		if(randomNumber <= weightSum)
+		{
+			chosenPowerup = PowerUpClasses[i];
+			break;
+		}
+	}
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParameters.Owner = this;
+	float XPos = RandStream.FRandRange(-100, 100);
+	float YPos = RandStream.FRandRange(MinYPos, MaxYPos);
+
+	APickup* Pickup = GetWorld()->SpawnActor<APickup>(PickupClass, FVector(XPos, YPos, 90.0f), FRotator::ZeroRotator, SpawnParameters);
+	APowerUp* PowerUp = GetWorld()->SpawnActor<APowerUp>(chosenPowerup);
+
+	Pickup->SetGUID(nextGUID++);
+	PowerUp->SetGUID(nextGUID++);
+
+	Pickup->SetPowerUp(PowerUp->GetGUID());
+	PowerUp->setPickupId(Pickup->GetGUID());
 }

@@ -18,7 +18,10 @@ public:
 
 	void move(float DeltaTime);
 	
+	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetSpeed(float speed);
+
+	UFUNCTION(BlueprintCallable, Category = Movement)
 	float GetSpeed();
 
 	void StartJitter();

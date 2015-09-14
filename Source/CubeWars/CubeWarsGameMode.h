@@ -6,6 +6,8 @@
 
 #include "Obstacle.h"
 #include "DestroyableObstacle.h"
+#include "Pickup.h"
+#include "PowerUp.h"
 
 #include "CubeWarsGameMode.generated.h"
 
@@ -91,8 +93,21 @@ protected:
 
 	void SpawnObstacle(int32 ObstacleIndex);
 
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = PowerUp)
+	TArray<TSubclassOf<APowerUp>> PowerUpClasses;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = PowerUp)
+	TArray<int32> PowerUpSpawnWeights;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = PowerUp)
+	TSubclassOf<APickup> PickupClass;
+
+	float PickupRespawnTime;
+
+	void SpawnPickup();
 private:
 	float startTimer;
+	float pickupRespawnTimer;
 	int32 nextSecond;
 	int32 winnerTeam;
 
@@ -101,4 +116,6 @@ private:
 	TArray<AActor*> ActorsToRemove;
 	bool firstPlayerRematch;
 	bool secondPlayerRematch;
+
+	int32 nextGUID;
 };

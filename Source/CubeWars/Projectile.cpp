@@ -6,7 +6,7 @@
 
 
 // Sets default values
-AProjectile::AProjectile() : damage(9.0f)
+AProjectile::AProjectile() : damage(9.0f), Instigator(nullptr)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -75,7 +75,7 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 {
 	if(OtherActor != nullptr && Role == ROLE_Authority)
 	{
-		OtherActor->TakeDamage(damage, FDamageEvent(), nullptr, this);
+		OtherActor->TakeDamage(damage, FDamageEvent(), Instigator, this);
 
 		UWorld* const World = GetWorld();
 
@@ -115,4 +115,9 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 void AProjectile::OnHitMulticast_Implementation()
 {
 	OnHitBP();
+}
+
+void AProjectile::SetInstigator(AController* Instigator)
+{
+	this->Instigator = Instigator;
 }
