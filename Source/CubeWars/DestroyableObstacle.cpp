@@ -209,6 +209,7 @@ float ADestroyableObstacle::TakeDamage(float DamageAmount, struct FDamageEvent c
 
 		Health -= DamageAmount;
 
+		float damageTaken;
 
 
 		if (Health <= 0)
@@ -217,14 +218,18 @@ float ADestroyableObstacle::TakeDamage(float DamageAmount, struct FDamageEvent c
 			ClientFallApart();
 
 			Destroy();
+
+			damageTaken = DamageAmount - FMath::Abs(Health);
 		}
 		else
 		{
 			// Let some parts fly around
 			ClientDamageCallback(Health);
+
+			damageTaken = DamageAmount;
 		}
 
-		return DamageAmount;
+		return damageTaken;
 	}
 
 	return 0.0f;

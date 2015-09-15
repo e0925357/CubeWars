@@ -102,6 +102,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = PowerUp)
 	TSubclassOf<APickup> PickupClass;
 
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = PowerUp)
 	float PickupRespawnTime;
 
 	void SpawnPickup();

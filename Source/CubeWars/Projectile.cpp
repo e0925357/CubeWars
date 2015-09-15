@@ -2,11 +2,12 @@
 
 #include "CubeWars.h"
 #include "Projectile.h"
+#include "AdvProjectileMovementComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 
 // Sets default values
-AProjectile::AProjectile() : damage(9.0f), Instigator(nullptr)
+AProjectile::AProjectile() : damage(9.0f), Instigator(nullptr), DebrisCount(9)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -44,13 +45,13 @@ AProjectile::AProjectile() : damage(9.0f), Instigator(nullptr)
 
 	RootComponent = CubeVisual;
 
-	movementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("CubeMovement"));
+	movementComponent = CreateDefaultSubobject<UAdvProjectileMovementComponent>(TEXT("CubeMovement"));
 	movementComponent->UpdatedComponent = RootComponent;
 	movementComponent->InitialSpeed = 3000.f;
 	movementComponent->MaxSpeed = 3000.f;
 	movementComponent->bRotationFollowsVelocity = false;
-	movementComponent->bShouldBounce = true;
-
+	movementComponent->bShouldBounce = false;
+	
 	// Die after 5 seconds by default
 	InitialLifeSpan = 5.0f;
 
@@ -75,23 +76,55 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 {
 	if(OtherActor != nullptr && Role == ROLE_Authority)
 	{
-		OtherActor->TakeDamage(damage, FDamageEvent(), Instigator, this);
+		float dealtDamage = ApplyDamage(OtherActor, OtherComp, NormalImpulse, Hit);
 
-		UWorld* const World = GetWorld();
+		SpawnDebris();
 
-		if(World != nullptr)
+		PostHit(dealtDamage);
+	}
+}
+
+void AProjectile::OnHitMulticast_Implementation()
+{
+	OnHitBP();
+}
+
+void AProjectile::SetInstigator(AController* InstigatorController)
+{
+	Instigator = InstigatorController;
+}
+
+float AProjectile::ApplyDamage(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	return OtherActor->TakeDamage(damage, FDamageEvent(), Instigator, this);
+}
+
+void AProjectile::PostHit(float DealtDamage)
+{
+	OnHitMulticast();
+
+	Destroy();
+}
+
+void AProjectile::SpawnDebris()
+{
+	UWorld* const World = GetWorld();
+
+	if(World != nullptr)
+	{
+		for(int i = 0; i < DebrisCount; i++)
 		{
-			for(int i = 0; i < 9; i++)
+			FVector Impulse((FMath::Rand()%1000) - 500, (FMath::Rand()%1000) - 500, (FMath::Rand()%1000) - 500);
+			Impulse.Normalize();
+
+			// spawn the debris
+			ACubeDebris* debris = World->SpawnActor<ACubeDebris>(DebrisClass, GetActorLocation() + Impulse, FRotator(0, 0, 0));
+
+			if(debris != nullptr)
 			{
-				FVector Impulse((FMath::Rand()%1000) - 500, (FMath::Rand()%1000) - 500, (FMath::Rand()%1000) - 500);
-				Impulse.Normalize();
-
-				// spawn the debris
-				ACubeDebris* debris = World->SpawnActor<ACubeDebris>(DebrisClass, GetActorLocation() + Impulse, FRotator(0, 0, 0));
-
 				FLinearColor PartColor;
 
-				if (CubeVisual->GetMaterial(0)->GetVectorParameterValue("Base Color", PartColor))
+				if(CubeVisual->GetMaterial(0)->GetVectorParameterValue("Base Color", PartColor))
 				{
 					debris->SetDebrisColorMulticast(PartColor);
 				}
@@ -105,19 +138,5 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 				}
 			}
 		}
-
-		OnHitMulticast();
-
-		Destroy();
 	}
-}
-
-void AProjectile::OnHitMulticast_Implementation()
-{
-	OnHitBP();
-}
-
-void AProjectile::SetInstigator(AController* Instigator)
-{
-	this->Instigator = Instigator;
 }

@@ -50,6 +50,10 @@ public:
 
 	void SetPowerUp(APowerUp* PowerUp);
 
+	void SetShootDelay(float ShootDelay);
+
+	float GetShootDelay();
+
 protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = Stats)

@@ -21,13 +21,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 
-	UPROPERTY(VisibleAnywhere, Category = Stats)
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	float damage;
 
 	/** called when projectile hits something */
 	UFUNCTION()
 	void OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	UMaterialInterface* hitDecalMaterial;
 
 	UFUNCTION(NetMulticast, reliable)
@@ -36,15 +37,26 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnHitBP();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<ACubeDebris> DebrisClass;
 
-	void SetInstigator(AController* Instigator);
+	//The number of debris-actors to spawn upon death
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	int32 DebrisCount;
+
+	UFUNCTION(BlueprintCallable, Category = Projectile)
+	void SetInstigator(AController* InstigatorController);
 
 protected:
 
+	virtual float ApplyDamage(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	virtual void SpawnDebris();
+
+	virtual void PostHit(float DealtDamage);
+
 	UPROPERTY(VisibleAnywhere, Category = Components)
-	class UProjectileMovementComponent* movementComponent;
+	class UAdvProjectileMovementComponent* movementComponent;
 
 	AController* Instigator;
 

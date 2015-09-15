@@ -224,7 +224,10 @@ void APlayerCube::Shoot()
 	// try and fire a projectile
 	if(ProjectileClass != nullptr && (PowerUp == nullptr || !PowerUp->IsAlive() || !PowerUp->OnShoot()))
 	{
-		const FRotator SpawnRotation = GetActorRotation();
+		FRandomStream RandStream;
+		RandStream.GenerateNewSeed();
+
+		const FRotator SpawnRotation = GetActorRotation() + FRotator(RandStream.FRandRange(-1.0f, 1.0f), 0.0f, 0.0f);
 		// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
 		const FVector OffsetVector(120.0f, 0.0f, 0.0f);
 		const FVector SpawnLocation = GetActorLocation() + SpawnRotation.RotateVector(OffsetVector);
@@ -245,7 +248,7 @@ void APlayerCube::Shoot()
 
 void APlayerCube::ShootOnClient_Implementation()
 {
-	if(PowerUp != nullptr && PowerUp->IsAlive() && PowerUp->OnShootClient())
+	if(PowerUp->IsValidLowLevel() && PowerUp->IsAlive() && PowerUp->OnShootClient())
 	{
 		return;
 	}
@@ -590,4 +593,15 @@ void APlayerCube::SetPowerUp_Implementation(int32 GUID)
 			}
 		}
 	}
+}
+
+void APlayerCube::SetShootDelay(float ShootDelay)
+{
+	this->ShootDelay = ShootDelay;
+	ShootTimer = 0;
+}
+
+float APlayerCube::GetShootDelay()
+{
+	return ShootDelay;
 }
