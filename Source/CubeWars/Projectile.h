@@ -51,7 +51,8 @@ protected:
 
 	virtual float ApplyDamage(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	virtual void SpawnDebris();
+	UFUNCTION(NetMulticast, reliable)
+	void SpawnDebris();
 
 	virtual void PostHit(float DealtDamage);
 

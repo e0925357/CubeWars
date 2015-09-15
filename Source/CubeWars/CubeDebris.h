@@ -20,8 +20,8 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	/** Called once this actor has been deleted */
-	virtual void Destroyed() override;
+	/** Called once this actor has been removed from the level */
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	// Sets the new color for the debris and applies it to the material
 	void SetDebrisColor(const FLinearColor& NewColor);

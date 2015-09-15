@@ -548,7 +548,7 @@ void APlayerCube::createDeathEffect(const FVector& location, const FRotator& rot
 	deathEffect->AttachTo(GetRootComponent());
 }
 
-void APlayerCube::CreateShockWave_Implementation()
+void APlayerCube::OnDeath_Implementation(float explosionForce)
 {
 
 	// Spawn the shockwave effects
@@ -560,6 +560,32 @@ void APlayerCube::CreateShockWave_Implementation()
 	
 	SpawnShockwave(ShockwaveParticleSystem, *this, FVector(0, 3.3333f, 0), FRotator(0, 90, 0));
 	SpawnShockwave(ShockwaveParticleSystem, *this, FVector(0, -3.3333f, 0), FRotator(0, 90, 0));
+
+	//Spawn little cubes
+	UWorld* const World = GetWorld();
+	FRotator rot = GetActorRotation();
+	FActorSpawnParameters SpawnInfo;
+	FVector Location;
+	FVector Impulse;
+	FVector ActorLocation = GetActorLocation();
+
+	for(float x = -33.3333f; x <= 33.3333f; x += 33.3333f)
+	{
+		for(float y = -33.3333f; y <= 33.3333f; y += 33.3333f)
+		{
+			for(float z = -33.3333f; z <= 33.3333f; z += 33.3333f)
+			{
+				Location.Set(x + ActorLocation.X, y + ActorLocation.Y, z + ActorLocation.Z);
+				Impulse.Set(x, y, z);
+				Impulse.Normalize();
+				Impulse *= explosionForce;
+
+				ACubeDebris* debris = World->SpawnActor<ACubeDebris>(ACubeDebris::StaticClass(), Location, rot, SpawnInfo);
+
+				debris->CubeVisual->AddImpulse(Impulse);
+			}
+		}
+	}
 }
 
 void APlayerCube::SetPowerUp(APowerUp* PowerUp)

@@ -106,7 +106,7 @@ void AProjectile::PostHit(float DealtDamage)
 	Destroy();
 }
 
-void AProjectile::SpawnDebris()
+void AProjectile::SpawnDebris_Implementation()
 {
 	UWorld* const World = GetWorld();
 

@@ -40,7 +40,7 @@ public:
 
 	// Tell the cube to create its death shockwaves
 	UFUNCTION(NetMulticast, Reliable)
-	void CreateShockWave();
+	void OnDeath(float explosionForce);
 
 	UPROPERTY(EditDefaultsOnly)
 	UMaterialInterface* hitDecalMaterial;

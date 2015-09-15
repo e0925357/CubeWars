@@ -15,10 +15,9 @@ ACubeDebris::ACubeDebris()
 	, DissolveParticleSystemComponent(nullptr)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
-	bReplicates = true;
-	bReplicateMovement = true;
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = false;
+	bReplicateMovement = false;
 
 	// Create and position a mesh component so we can see where our cube is
 	CubeVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
@@ -119,9 +118,9 @@ void ACubeDebris::Tick( float DeltaTime )
 	}
 }
 
-void ACubeDebris::Destroyed()
+void ACubeDebris::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::Destroyed();
+	Super::EndPlay(EndPlayReason);
 
 	if (DissolveParticleSystemComponent->IsValidLowLevel())
 	{
