@@ -106,7 +106,7 @@ protected:
 
 	void Shoot();
 
-	UFUNCTION(Client, reliable)
+	UFUNCTION(NetMulticast, reliable)
 	void ShootOnClient();
 
 	UFUNCTION(NetMulticast, reliable)

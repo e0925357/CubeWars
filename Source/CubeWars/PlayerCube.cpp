@@ -248,6 +248,11 @@ void APlayerCube::Shoot()
 
 void APlayerCube::ShootOnClient_Implementation()
 {
+	if(Role == ROLE_Authority)
+	{
+		return;
+	}
+
 	if(PowerUp->IsValidLowLevel() && PowerUp->IsAlive() && PowerUp->OnShootClient())
 	{
 		return;
@@ -325,6 +330,11 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 
 void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, float newHealth, AActor* DamageCauser)
 {
+	if(Role == ROLE_Authority)
+	{
+		return;
+	}
+
 	Health = newHealth;
 
 	HealthChanged();
