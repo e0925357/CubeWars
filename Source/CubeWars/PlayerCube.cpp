@@ -248,10 +248,6 @@ void APlayerCube::Shoot()
 
 void APlayerCube::ShootOnClient_Implementation()
 {
-	if(Role == ROLE_Authority)
-	{
-		return;
-	}
 
 	if(PowerUp->IsValidLowLevel() && PowerUp->IsAlive() && PowerUp->OnShootClient())
 	{
@@ -330,10 +326,6 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 
 void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, float newHealth, AActor* DamageCauser)
 {
-	if(Role == ROLE_Authority)
-	{
-		return;
-	}
 
 	Health = newHealth;
 
@@ -572,13 +564,9 @@ void APlayerCube::CreateShockWave_Implementation()
 
 void APlayerCube::SetPowerUp(APowerUp* PowerUp)
 {
-	if(this->PowerUp->IsValidLowLevel())
+	if(Role == ROLE_Authority && this->PowerUp->IsValidLowLevel())
 	{
-		if(Role == ROLE_Authority)
-		{
-			this->PowerUp->Detach();
-		}
-
+		this->PowerUp->Detach();
 		this->PowerUp->Destroy();
 	}
 

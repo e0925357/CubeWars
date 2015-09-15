@@ -177,6 +177,9 @@ void ADestroyableObstacle::Tick( float DeltaTime )
 			++i;
 		}
 
+		if(!CubeVisual->IsValidLowLevel())
+			return;
+
 		CubeVisual->SetRelativeLocation(NewPosition);
 
 		if (MaterialInstance)
