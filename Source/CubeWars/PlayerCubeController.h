@@ -28,6 +28,12 @@ public:
 	void OnShowFullscreenMessage(const FString& text);
 
 	UFUNCTION(Client, Reliable)
+	void showNotificationMessage(const FString& text);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnShowNotificationMessage(const FString& text);
+
+	UFUNCTION(Client, Reliable)
 	void matchEnded(const FString& player1Name, int32 player1Points, const FString& player2Name, int32 player2Points, bool hasWon);
 
 	UFUNCTION(BlueprintImplementableEvent)

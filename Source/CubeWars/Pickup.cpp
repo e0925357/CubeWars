@@ -4,6 +4,7 @@
 #include "Pickup.h"
 #include "PowerUp.h"
 #include "PlayerCube.h"
+#include "PlayerCubeController.h"
 
 
 // Sets default values
@@ -93,6 +94,13 @@ float APickup::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 		if(PlayerCube != nullptr)
 		{
 			PlayerCube->SetPowerUp(PowerUp->GetGUID());
+		}
+
+		APlayerCubeController* playerCubeController = Cast<APlayerCubeController>(EventInstigator);
+
+		if(playerCubeController != nullptr)
+		{
+			playerCubeController->showNotificationMessage(PowerUp->Name);
 		}
 	}
 

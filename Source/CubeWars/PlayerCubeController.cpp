@@ -23,6 +23,11 @@ void APlayerCubeController::showFullscreenMessage_Implementation(const FString& 
 	OnShowFullscreenMessage(text);
 }
 
+void APlayerCubeController::showNotificationMessage_Implementation(const FString& text)
+{
+	OnShowNotificationMessage(text);
+}
+
 bool APlayerCubeController::canShoot()
 {
 	return bCanShoot;
