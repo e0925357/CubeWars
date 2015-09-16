@@ -166,6 +166,12 @@ void ACubeWarsGameMode::HandleMatchIsWaitingToStart()
 	firstPlayerRematch = false;
 	secondPlayerRematch = false;
 
+	ObstacleArray.Empty();
+	ObstacleRespawnArray.Empty();
+
+	ObstacleArray.AddZeroed(NumObstacles);
+	ObstacleRespawnArray.AddZeroed(NumObstacles);
+
 	//Create obstacles
 	for (int32 i = 0; i < NumObstacles; ++i)
 	{
@@ -219,19 +225,18 @@ void ACubeWarsGameMode::Tick(float DeltaSeconds)
 		// Tick code to call when fighting
 
 		// Update respawn of obstacles
-		for (int32 i = 0; i < ObstacleRespawnArray.Num();)
+		for (int32 i = 0; i < ObstacleRespawnArray.Num(); ++i)
 		{
-			ObstacleRespawner& Respawner = ObstacleRespawnArray[i];
-			Respawner.Timer += DeltaSeconds;
-
-			if (Respawner.Timer >= ObstacleRespawnTime)
+			if(ObstacleArray[i] != nullptr)
 			{
-				SpawnObstacle(Respawner.ObstacleIndex);
-				ObstacleRespawnArray.RemoveAt(i);
+				continue;
 			}
-			else
+
+			ObstacleRespawnArray[i] += DeltaSeconds;
+
+			if(ObstacleRespawnArray[i] >= ObstacleRespawnTime)
 			{
-				++i;
+				SpawnObstacle(i);
 			}
 		}
 
@@ -493,25 +498,12 @@ void ACubeWarsGameMode::HandleMatchHasEnded()
 void ACubeWarsGameMode::ObstacleDied(int32 ObstacleIndex)
 {
 	// First check whether the obstacle is already respawning
-	for (int32 i = 0; i < ObstacleRespawnArray.Num(); ++i)
+	if(ObstacleRespawnArray[ObstacleIndex] > 0.0f)
 	{
-		if (ObstacleRespawnArray[i].ObstacleIndex == ObstacleIndex)
-		{
-			return;
-		}
+		return;
 	}
 
-	ObstacleRespawnArray.Add(ObstacleRespawner(ObstacleIndex));
-
-	//Remove it from the active obstacles list
-	for(int32 i = 0; i < ObstacleArray.Num(); ++i)
-	{
-		if(ObstacleArray[i]->GetObstacleIndex() == ObstacleIndex)
-		{
-			ObstacleArray.RemoveAt(i);
-			break;
-		}
-	}
+	ObstacleArray[ObstacleIndex] = nullptr;
 }
 
 void ACubeWarsGameMode::SpawnObstacle(int32 ObstacleIndex)
@@ -531,7 +523,8 @@ void ACubeWarsGameMode::SpawnObstacle(int32 ObstacleIndex)
 	obstacle->SetObstacleIndex(ObstacleIndex);
 	obstacle->GetObstacleMovementComponent()->SetMovingRightMulticast(RandStream.RandRange(0, 1) != 0);
 
-	ObstacleArray.Add(obstacle);
+	ObstacleArray[ObstacleIndex] = obstacle;
+	ObstacleRespawnArray[ObstacleIndex] = 0.0f;
 }
 
 void ACubeWarsGameMode::requestRematch(int32 team)
@@ -565,9 +558,13 @@ void ACubeWarsGameMode::requestRematch(int32 team)
 	{
 		//*** Restart Level
 		//Remove all obstacles
-		for(int32 i = 0; i < ObstacleArray.Num(); ++i)
+		for(int32 i = 0; i < NumObstacles; ++i)
 		{
-			ObstacleArray[i]->Destroy();
+			if(ObstacleArray[i] != nullptr && !ObstacleArray[i]->IsActorBeingDestroyed())
+				ObstacleArray[i]->Destroy();
+
+			ObstacleArray[i] = nullptr;
+			ObstacleRespawnArray[i] = 0.0f;
 		}
 
 		//Remove marked actors
@@ -576,8 +573,6 @@ void ACubeWarsGameMode::requestRematch(int32 team)
 			ActorsToRemove[i]->Destroy();
 		}
 
-		ObstacleArray.Empty();
-		ObstacleRespawnArray.Empty();
 		ActorsToRemove.Empty();
 
 		//Remove all pawns & notify them that the game restarts now

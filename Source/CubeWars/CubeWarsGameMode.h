@@ -17,19 +17,6 @@ namespace MatchState
 	extern const FName Fight;
 }
 
-/** Struct used to respawn an obstacle */
-struct ObstacleRespawner
-{
-	ObstacleRespawner(int32 Index)
-		: ObstacleIndex(Index)
-		, Timer(0.0f)
-	{
-	}
-
-	int32 ObstacleIndex;
-	float Timer;
-};
-
 /**
  * 
  */
@@ -112,7 +99,7 @@ private:
 	int32 nextSecond;
 	int32 winnerTeam;
 
-	TArray<ObstacleRespawner> ObstacleRespawnArray;
+	TArray<float> ObstacleRespawnArray;
 	TArray<ADestroyableObstacle*> ObstacleArray;
 	TArray<AActor*> ActorsToRemove;
 	bool firstPlayerRematch;
