@@ -54,6 +54,8 @@ public:
 
 	float GetShootDelay();
 
+	virtual void UnPossessed() override;
+
 protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = Stats)

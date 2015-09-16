@@ -66,7 +66,7 @@ APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f), ShootTimer(0.0f), 
 	SpringArm->AttachTo(RootComponent);
 	SpringArm->RelativeRotation = FRotator(-20.f, 0.f, 0.f);
 	SpringArm->TargetArmLength = 400.0f;
-	SpringArm->bEnableCameraLag = true;
+	SpringArm->bEnableCameraLag = false;
 	SpringArm->CameraLagSpeed = 3.0f;
 
 	// Create a camera and attach to our spring arm
@@ -217,6 +217,13 @@ void APlayerCube::Tick( float DeltaTime )
 			}
 		}
 	}
+}
+
+void APlayerCube::UnPossessed()
+{
+	Super::UnPossessed();
+
+	IsShooting = false;
 }
 
 void APlayerCube::Shoot()
