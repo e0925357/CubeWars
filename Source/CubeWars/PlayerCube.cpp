@@ -213,7 +213,8 @@ void APlayerCube::Tick( float DeltaTime )
 			{
 				PowerUp->Detach();
 				PowerUp->Destroy();
-				PowerUp = nullptr;
+				
+				DisablePowerUp();
 			}
 		}
 	}
@@ -643,4 +644,9 @@ APowerUp* APlayerCube::GetPowerUp()
 		return PowerUp;
 	else
 		return nullptr;
+}
+
+void APlayerCube::DisablePowerUp_Implementation()
+{
+	PowerUp = nullptr;
 }

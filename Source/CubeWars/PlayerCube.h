@@ -89,6 +89,10 @@ protected:
 
 	UAudioComponent* deathAudioComponent;
 
+	UFUNCTION(NetMulticast, reliable)
+	//Sets the PowerUp to nullptr
+	void DisablePowerUp();
+
 	//---------------------------------------------------------------------------------------------
 	// Shooting
 	//---------------------------------------------------------------------------------------------
