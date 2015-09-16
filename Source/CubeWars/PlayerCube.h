@@ -50,6 +50,9 @@ public:
 
 	void SetPowerUp(APowerUp* PowerUp);
 
+	UFUNCTION(BlueprintPure, Category = Powerup)
+	APowerUp* GetPowerUp();
+
 	void SetShootDelay(float ShootDelay);
 
 	float GetShootDelay();

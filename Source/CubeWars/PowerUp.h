@@ -26,7 +26,7 @@ public:
 	/**
 	* The duration of the effect once picked up in seconds.
 	*/
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = Powerup)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = Powerup, Replicated)
 	float EffectDuration;
 
 	/**
@@ -125,9 +125,14 @@ public:
 	UFUNCTION(NetMulticast, reliable)
 	void SetGUID(int32 GUID);
 
+	//Returns a number between 1 (at full lifetime) and 0 (no lifetime anymore)
+	UFUNCTION(BlueprintPure, Category = Powerup)
+	float GetEffectDurationPercent();
+
 private:
 	UPROPERTY()
 	APlayerCube* PlayerCube;
 	int32 PickupId;
 	int32 GUID;
+	float MaxEffectDuration;
 };

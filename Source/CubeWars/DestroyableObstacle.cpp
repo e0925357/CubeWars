@@ -164,7 +164,7 @@ void ADestroyableObstacle::Tick( float DeltaTime )
 			NewOpacity = 1.0f;
 			ConstructionProgresses.RemoveAt(i);
 
-			if (FinalPartMaterial)
+			if(FinalPartMaterial && CubeVisual->IsValidLowLevel())
 			{
 				CubeVisual->SetMaterial(0, FinalPartMaterial);
 			}

@@ -3,6 +3,7 @@
 #include "CubeWars.h"
 #include "PowerUp.h"
 #include "Pickup.h"
+#include "Net/UnrealNetwork.h"
 
 
 
@@ -36,6 +37,8 @@ void APowerUp::BeginPlay()
 			}
 		}
 	}
+
+	MaxEffectDuration = EffectDuration;
 }
 
 APlayerCube* APowerUp::GetPlayerCube()
@@ -117,3 +120,16 @@ void APowerUp::SetGUID_Implementation(int32 GUID)
 {
 	this->GUID = GUID;
 }
+
+float APowerUp::GetEffectDurationPercent()
+{
+	return FMath::Max(0.0f, EffectDuration)/MaxEffectDuration;
+}
+
+void APowerUp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APowerUp, EffectDuration);
+}
+

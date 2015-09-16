@@ -636,3 +636,11 @@ float APlayerCube::GetShootDelay()
 {
 	return ShootDelay;
 }
+
+APowerUp* APlayerCube::GetPowerUp()
+{
+	if(PowerUp->IsValidLowLevel())
+		return PowerUp;
+	else
+		return nullptr;
+}
