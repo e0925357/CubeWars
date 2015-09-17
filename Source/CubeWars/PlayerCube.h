@@ -42,9 +42,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void OnDeath(float explosionForce);
 
-	UPROPERTY(EditDefaultsOnly)
-	UMaterialInterface* hitDecalMaterial;
-
 	UFUNCTION(NetMulticast, reliable)
 	void SetPowerUp(int32 GUID);
 
@@ -61,7 +58,7 @@ public:
 
 protected:
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = Stats)
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = Stats, ReplicatedUsing = OnRep_HealthChanged)
 	float Health;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -69,6 +66,9 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void HealthChanged();
+
+	UFUNCTION()
+	void OnRep_HealthChanged();
 
 	void createDeathEffect(const FVector& location, const FRotator& rotation, FName name);
 
@@ -119,7 +119,7 @@ protected:
 	void ShootOnClient();
 
 	UFUNCTION(NetMulticast, reliable)
-	void ClientDamageCallback(float damageAmount, float newHealth, AActor* DamageCauser);
+	void ClientDamageCallback(float damageAmount, AActor* DamageCauser);
 
 	//---------------------------------------------------------------------------------------------
 	// Movement

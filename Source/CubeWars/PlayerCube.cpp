@@ -246,7 +246,6 @@ void APlayerCube::Shoot()
 			// spawn the projectile at the muzzle
 			AProjectile* projectile = World->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
 
-			projectile->hitDecalMaterial = hitDecalMaterial;
 			projectile->SetInstigator(GetController());
 		}
 	}
@@ -280,7 +279,7 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 
 	if(Health <= 0)
 	{
-		return 0;
+		return DamageAmount;
 	}
 
 	float ModifiedDamageAmount;
@@ -327,15 +326,14 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 		bReplicateMovement = true;
 	}
 
-	ClientDamageCallback(DamageAmount, Health, DamageCauser);
+	ClientDamageCallback(ModifiedDamageAmount, DamageCauser);
+	HealthChanged();
 
 	return DamageAmount;
 }
 
-void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, float newHealth, AActor* DamageCauser)
+void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, AActor* DamageCauser)
 {
-
-	Health = newHealth;
 
 	HealthChanged();
 
@@ -343,9 +341,6 @@ void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, float 
 	{
 		return;
 	}
-
-	if(hitDecalMaterial && DamageCauser)
-		UGameplayStatics::SpawnDecalAttached(hitDecalMaterial, FVector(10, 10, 20), RootComponent, NAME_None, DamageCauser->GetActorLocation(), FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
 
 	// try and play the sound if specified
 	if(DamageSound != nullptr)
@@ -488,6 +483,11 @@ void APlayerCube::OnRep_RotChange()
 	SetActorRotation(CurrentRotation);
 }
 
+void APlayerCube::OnRep_HealthChanged()
+{
+	HealthChanged();
+}
+
 UPawnMovementComponent* APlayerCube::GetMovementComponent() const
 {
 	return CubeMovement;
@@ -499,7 +499,8 @@ void APlayerCube::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 	DOREPLIFETIME(APlayerCube, CubeMovement);
 	DOREPLIFETIME(APlayerCube, CurrentPosition);
-	DOREPLIFETIME(APlayerCube, CurrentRotation);
+	DOREPLIFETIME(APlayerCube, CurrentRotation); 
+	DOREPLIFETIME(APlayerCube, Health);
 }
 
 void APlayerCube::startRaising(float targetHeight)

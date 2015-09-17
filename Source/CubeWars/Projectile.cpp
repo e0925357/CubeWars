@@ -7,7 +7,7 @@
 
 
 // Sets default values
-AProjectile::AProjectile() : damage(9.0f), Instigator(nullptr), DebrisCount(9)
+AProjectile::AProjectile() : damage(9.0f), Instigator(nullptr), DebrisCount(9), ImpactSize(10.0f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -81,6 +81,12 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 		SpawnDebris();
 
 		PostHit(dealtDamage);
+	}
+
+	if(OtherActor != nullptr && OtherActor->bCanBeDamaged && OtherComp != nullptr && hitDecalMaterial != nullptr)
+	{
+		FVector actorToProjectileVector = GetActorLocation() - OtherActor->GetActorLocation();
+		UGameplayStatics::SpawnDecalAttached(hitDecalMaterial, FVector(ImpactSize, ImpactSize, actorToProjectileVector.Size()), OtherComp, NAME_None, GetActorLocation(), FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
 	}
 }
 

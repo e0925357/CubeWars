@@ -23,7 +23,10 @@ public:
 	int32 MinProjectileCount;
 
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-	float MaxAngleDerivation;
+	float MaxPitchAngleDerivation;
+
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	float MaxYawAngleDerivation;
 
 	virtual bool OnShoot_Implementation() override;
 	

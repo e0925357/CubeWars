@@ -24,6 +24,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	float damage;
 
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	float ImpactSize;
+
 	/** called when projectile hits something */
 	UFUNCTION()
 	void OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

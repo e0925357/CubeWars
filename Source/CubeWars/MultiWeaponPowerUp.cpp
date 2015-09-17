@@ -3,7 +3,7 @@
 #include "CubeWars.h"
 #include "MultiWeaponPowerUp.h"
 
-AMultiWeaponPowerUp::AMultiWeaponPowerUp() : MaxProjectileCount(8), MinProjectileCount(5), MaxAngleDerivation(5.0f)
+AMultiWeaponPowerUp::AMultiWeaponPowerUp() : MaxProjectileCount(8), MinProjectileCount(5), MaxPitchAngleDerivation(5.0f), MaxYawAngleDerivation(5.0f)
 {
 
 }
@@ -31,10 +31,14 @@ bool AMultiWeaponPowerUp::OnShoot_Implementation()
 			float PitchDerivation = 0.0f;
 			float YawDerivation = 0.0f;
 
-			if(MaxAngleDerivation > 0)
+			if(MaxPitchAngleDerivation > 0)
 			{
-				PitchDerivation = RandStream.FRandRange(-MaxAngleDerivation, MaxAngleDerivation);
-				YawDerivation = RandStream.FRandRange(-MaxAngleDerivation, MaxAngleDerivation);
+				PitchDerivation = RandStream.FRandRange(-MaxPitchAngleDerivation, MaxPitchAngleDerivation);
+			}
+
+			if(MaxYawAngleDerivation > 0)
+			{
+				YawDerivation = RandStream.FRandRange(-MaxYawAngleDerivation, MaxYawAngleDerivation);
 			}
 
 			const FRotator SpawnRotation = GetPlayerCube()->GetActorRotation() + FRotator(PitchDerivation, YawDerivation, 0.0f);
