@@ -320,7 +320,7 @@ float APlayerCube::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 
 		//Possess an orbiting camera-pawn
 		AOrbitingPawn* orbitingPawn = GetWorld()->SpawnActor<AOrbitingPawn>(AOrbitingPawn::StaticClass());
-		orbitingPawn->SetupOrbit(GetActorLocation() + FVector(0.0f, 0.0f, 200.0f), 500.0f, 15.0f);
+		orbitingPawn->SetupOrbitMulticast(GetActorLocation() + FVector(0.0f, 0.0f, 200.0f), 500.0f, 45.0f);
 		playerController->Possess(orbitingPawn);
 
 		bReplicateMovement = true;
