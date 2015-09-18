@@ -13,7 +13,7 @@ Our Trello board can be viewed here: https://trello.com/b/lxfkdOQE/cubewars
 ## About the Game
 This game can only be played with 2 players. Each player takes control over a cube that is able to slide to the right(Via [A] and [D]) and left, but cannot move forth nor back. A player may also rotate their cube using the mouse and fire with the left mouse button. The first player that reaches 0 health loses the match. To make things more interesting there are moveable barriers between the players to block their shots, but they can destroy them. Additionally power-ups are spawning in the middle of the battlefield. The first player that hits them gets a bonus for a limited amount of time.
 
-### Power Ups
+### Power-ups
 * Wreckingball
   * Player shoots a spiky ball
   * Slow, but powerful
