@@ -21,6 +21,7 @@ namespace
 namespace MatchState
 {
 	const FName Fight = TEXT("Fight");
+	const FName AfterDeathDelay = TEXT("AfterDeathDelay");
 }
 
 ACubeWarsGameMode::ACubeWarsGameMode()
@@ -37,6 +38,7 @@ ACubeWarsGameMode::ACubeWarsGameMode()
 	, PickupClass(APickup::StaticClass())
 	, pickupRespawnTimer(30.0f)
 	, nextGUID(0)
+	, AfterDeathTime(1.5f)
 {
 	GameStateClass = ACubeWarsGameState::StaticClass();
 	DefaultPawnClass = APlayerCube::StaticClass();
@@ -165,6 +167,7 @@ void ACubeWarsGameMode::HandleMatchIsWaitingToStart()
 	//Reset rematch-requests
 	firstPlayerRematch = false;
 	secondPlayerRematch = false;
+	afterDeathTimer = AfterDeathTime;
 
 	ObstacleArray.Empty();
 	ObstacleRespawnArray.Empty();
@@ -213,7 +216,7 @@ bool ACubeWarsGameMode::ReadyToStartMatch_Implementation()
 /** @return true if ready to End Match. Games should override this */
 bool ACubeWarsGameMode::ReadyToEndMatch_Implementation()
 {
-	return GetMatchState() == MatchState::Fight && winnerTeam > 0;
+	return GetMatchState() == MatchState::AfterDeathDelay && afterDeathTimer <= 0;
 }
 
 void ACubeWarsGameMode::Tick(float DeltaSeconds)
@@ -247,6 +250,12 @@ void ACubeWarsGameMode::Tick(float DeltaSeconds)
 		{
 			pickupRespawnTimer = PickupRespawnTime;
 			SpawnPickup();
+		}
+
+		//Next state?
+		if(winnerTeam > 0)
+		{
+			SetMatchState(MatchState::AfterDeathDelay);
 		}
 	}
 	else if(GetMatchState() == MatchState::InProgress)
@@ -315,6 +324,10 @@ void ACubeWarsGameMode::Tick(float DeltaSeconds)
 			SetMatchState(MatchState::Fight);
 		}
 	}
+	else if(GetMatchState() == MatchState::AfterDeathDelay)
+	{
+		afterDeathTimer -= DeltaSeconds;
+	}
 
 	//Should we end the match?
 	if(IsMatchInProgress() && ReadyToEndMatch())
@@ -325,7 +338,7 @@ void ACubeWarsGameMode::Tick(float DeltaSeconds)
 
 bool ACubeWarsGameMode::IsMatchInProgress() const
 {
-	if(GetMatchState() == MatchState::InProgress || GetMatchState() == MatchState::Fight)
+	if(GetMatchState() == MatchState::InProgress || GetMatchState() == MatchState::Fight || GetMatchState() == MatchState::AfterDeathDelay)
 	{
 		return true;
 	}

@@ -92,10 +92,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = PowerUp)
 	float PickupRespawnTime;
 
+	/** The amount of time the players have to wait after the cube explosion. */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = GameplayControl)
+	float AfterDeathTime;
+
 	void SpawnPickup();
 private:
 	float startTimer;
 	float pickupRespawnTimer;
+	float afterDeathTimer;
 	int32 nextSecond;
 	int32 winnerTeam;
 
