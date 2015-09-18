@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// This source code file is protected by the MIT License (MIT)
 
 #include "CubeWars.h"
 #include "BpNetworkLevelTravelLib.h"
