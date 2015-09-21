@@ -40,6 +40,13 @@ void UBackgroundMusicComponent::BeginPlay()
 	}
 }
 
+void UBackgroundMusicComponent::BeginDestroy()
+{
+	SongEndedDelegate.Clear();
+	SongStartedDelegate.Clear();
+
+	Super::BeginDestroy();
+}
 
 // Called every frame
 void UBackgroundMusicComponent::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
@@ -51,7 +58,8 @@ void UBackgroundMusicComponent::TickComponent( float DeltaTime, ELevelTick TickT
 
 void UBackgroundMusicComponent::SongEnded()
 {
-	OnSongEnded();
+	UE_LOG(LogTemp, Warning, TEXT("Song Ended!"));
+	SongEndedDelegate.Broadcast();
 
 	if(bAutoplay)
 	{
@@ -102,7 +110,7 @@ void UBackgroundMusicComponent::NextSong()
 
 	if(CurrentPlaylistIndex >= MusicPlaylist.Num())
 	{
-		CurrentPlaylistIndex = 0;
+		SetUpPlaylist();
 	}
 
 	Play();
@@ -119,8 +127,9 @@ void UBackgroundMusicComponent::Play()
 		AttachedSound = UGameplayStatics::SpawnSoundAttached(MusicTitles[MusicPlaylist[CurrentPlaylistIndex]].MusicSound, this, TEXT("MusicSoundComponent"));
 		AttachedSound->AdjustAttenuation(attenuationSettings);
 		AttachedSound->OnAudioFinished.AddDynamic(this, &UBackgroundMusicComponent::SongEnded);
+		AttachedSound->bAutoDestroy = false;
 
-		OnSongStarted();
+		SongStartedDelegate.Broadcast();
 	}
 	else
 	{
@@ -129,8 +138,10 @@ void UBackgroundMusicComponent::Play()
 		AttachedSound->Sound = MusicTitles[MusicPlaylist[CurrentPlaylistIndex]].MusicSound;
 		AttachedSound->Play();
 
-		OnSongStarted();
+		SongStartedDelegate.Broadcast();
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Song started!"));
 }
 
 void UBackgroundMusicComponent::Stop()
@@ -141,7 +152,7 @@ void UBackgroundMusicComponent::Stop()
 	}
 }
 
-const FMusicTitle& UBackgroundMusicComponent::GetCurrentMusicTitle()
+FMusicTitle& UBackgroundMusicComponent::GetCurrentMusicTitle()
 {
 	return MusicTitles[MusicPlaylist[CurrentPlaylistIndex]];
 }

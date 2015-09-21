@@ -6,10 +6,10 @@
 #include "BackgroundMusicComponent.generated.h"
 
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FMusicTitle
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Music")
 	USoundBase* MusicSound;
@@ -20,6 +20,9 @@ struct FMusicTitle
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Music")
 	FString Artist;
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSongStarted);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSongEnded);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -33,6 +36,8 @@ public:
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	virtual void BeginDestroy() override;
 	
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
@@ -49,11 +54,11 @@ public:
 	UFUNCTION()
 	void SongEnded();
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnSongEnded();
+	UPROPERTY(BlueprintAssignable, Category = Music, meta = (DisplayName = "On Song Started"))
+	FSongStarted SongStartedDelegate;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnSongStarted();
+	UPROPERTY(BlueprintAssignable, Category = Music, meta = (DisplayName = "On Song Ended"))
+	FSongEnded SongEndedDelegate;
 
 	UFUNCTION(BlueprintCallable, Category = "Music")
 	void NextSong();
@@ -65,7 +70,7 @@ public:
 	void Stop();
 
 	UFUNCTION(BlueprintCallable, Category = "Music")
-	const FMusicTitle& GetCurrentMusicTitle();
+	FMusicTitle& GetCurrentMusicTitle();
 
 private:
 	void SetUpPlaylist();
