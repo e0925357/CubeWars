@@ -36,7 +36,7 @@ void APickup::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
-	if(PowerUp->IsValidLowLevel())
+	if(PowerUp != nullptr && PowerUp->IsValidLowLevel())
 	{
 		PowerUp->Lifetime -= DeltaTime;
 
@@ -68,11 +68,11 @@ void APickup::SetPowerUp(APowerUp* PowerUp)
 {
 	this->PowerUp = PowerUp;
 
-	if(PowerUp->IsValidLowLevel() && PowerUp->PickupMesh->IsValidLowLevel())
+	if(PowerUp != nullptr && PowerUp->IsValidLowLevel() && PowerUp->PickupMesh->IsValidLowLevel())
 	{
 		MeshComponent->SetStaticMesh(PowerUp->PickupMesh);
 
-		if(PowerUp->PickupOverrideMaterial->IsValidLowLevel())
+		if(PowerUp->PickupOverrideMaterial != nullptr && PowerUp->PickupOverrideMaterial->IsValidLowLevel())
 		{
 			MeshComponent->SetMaterial(0, PowerUp->PickupOverrideMaterial);
 		}
@@ -87,7 +87,7 @@ APowerUp* APickup::GetPowerUp()
 
 float APickup::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if(EventInstigator->IsValidLowLevel() && PowerUp->IsValidLowLevel())
+	if(EventInstigator != nullptr && EventInstigator->IsValidLowLevel() && PowerUp != nullptr && PowerUp->IsValidLowLevel())
 	{
 		APlayerCube* PlayerCube = Cast<APlayerCube>(EventInstigator->GetPawn());
 

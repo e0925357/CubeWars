@@ -120,12 +120,12 @@ void ACubeDebris::Tick( float DeltaTime )
 
 void ACubeDebris::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
-
-	if (DissolveParticleSystemComponent->IsValidLowLevel())
+	if(DissolveParticleSystemComponent != nullptr && DissolveParticleSystemComponent->IsValidLowLevel())
 	{
 		DissolveParticleSystemComponent->DestroyComponent();
 	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ACubeDebris::SetDebrisColor(const FLinearColor& NewColor)

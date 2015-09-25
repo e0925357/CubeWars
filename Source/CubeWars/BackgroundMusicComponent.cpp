@@ -146,7 +146,7 @@ void UBackgroundMusicComponent::Play()
 
 void UBackgroundMusicComponent::Stop()
 {
-	if(AttachedSound->IsValidLowLevel() && AttachedSound->IsPlaying())
+	if(AttachedSound != nullptr && AttachedSound->IsValidLowLevel() && AttachedSound->IsPlaying())
 	{
 		AttachedSound->Stop();
 	}

@@ -256,7 +256,7 @@ void APlayerCube::Shoot()
 void APlayerCube::ShootOnClient_Implementation()
 {
 
-	if(PowerUp->IsValidLowLevel() && PowerUp->IsAlive() && PowerUp->OnShootClient())
+	if(PowerUp != nullptr && PowerUp->IsValidLowLevel() && PowerUp->IsAlive() && PowerUp->OnShootClient())
 	{
 		return;
 	}
@@ -337,7 +337,7 @@ void APlayerCube::ClientDamageCallback_Implementation(float damageAmount, AActor
 
 	HealthChanged();
 
-	if(PowerUp->IsValidLowLevel() && !PowerUp->IsAlive() && PowerUp->OnTakeDamageClient(DamageCauser))
+	if(PowerUp != nullptr && PowerUp->IsValidLowLevel() && !PowerUp->IsAlive() && PowerUp->OnTakeDamageClient(DamageCauser))
 	{
 		return;
 	}
@@ -599,7 +599,7 @@ void APlayerCube::OnDeath_Implementation(float explosionForce)
 
 void APlayerCube::SetPowerUp(APowerUp* PowerUp)
 {
-	if(Role == ROLE_Authority && this->PowerUp->IsValidLowLevel())
+	if(Role == ROLE_Authority && this->PowerUp != nullptr &&  this->PowerUp->IsValidLowLevel())
 	{
 		this->PowerUp->Detach();
 		this->PowerUp->Destroy();
@@ -641,7 +641,7 @@ float APlayerCube::GetShootDelay()
 
 APowerUp* APlayerCube::GetPowerUp()
 {
-	if(PowerUp->IsValidLowLevel())
+	if(PowerUp != nullptr && PowerUp->IsValidLowLevel())
 		return PowerUp;
 	else
 		return nullptr;

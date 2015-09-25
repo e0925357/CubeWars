@@ -445,7 +445,7 @@ void ACubeWarsGameMode::HandleMatchHasEnded()
 				int32 playerTeam = playerState->GetTeamNumber();
 
 				//unpossess old pawn, create & possess orbiting spectators
-				if(playerCubeController->GetPawn()->IsValidLowLevel())
+				if(playerCubeController->GetPawn() != nullptr && playerCubeController->GetPawn()->IsValidLowLevel())
 					ActorsToRemove.Add(playerCubeController->GetPawn());
 
 				playerCubeController->UnPossess();
@@ -595,7 +595,7 @@ void ACubeWarsGameMode::requestRematch(int32 team)
 
 			APawn* controlledPawn = playerController->GetPawn();
 
-			if(controlledPawn->IsValidLowLevel())
+			if(controlledPawn != nullptr && controlledPawn->IsValidLowLevel())
 			{
 				controlledPawn->Destroy();
 			}
