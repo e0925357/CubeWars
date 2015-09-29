@@ -42,7 +42,10 @@ public:
 	int32 NumCubesPerSide;
 
 	UPROPERTY(EditDefaultsOnly, Category = Visual)
-	float RespawnTime;
+	float RespawnTimeMin;
+
+	UPROPERTY(EditDefaultsOnly, Category = Visual)
+	float RespawnTimeMax;
 
 	UPROPERTY(EditDefaultsOnly, Category = Visual)
 	float GridCubeLifetime;
@@ -53,6 +56,8 @@ public:
 private:
 	TArray<GridCubeSpawner> HorizontalSpawners;
 	TArray<GridCubeSpawner> VerticalSpawners;
+
+	FRandomStream RandStream;
 
 	void SpawnGridCube(const GridCubeSpawner& Spawner, bool Horizontal) const;
 
