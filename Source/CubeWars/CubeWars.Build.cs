@@ -6,7 +6,7 @@ public class CubeWars : ModuleRules
 {
 	public CubeWars(TargetInfo Target)
 	{
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "RHI" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
