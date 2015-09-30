@@ -70,8 +70,8 @@ public:
 	/** Gets the index of this obstacle */
 	int32 GetObstacleIndex() { return ObstacleIndex; }
 
-	/** Queries whether the construction of the obstacle is in progress */
-	bool IsConstructionInProgress() const { return (ConstructionTimer < TotalConstructionTime); }
+	/** Check whether the given visual is part of the assembling of the obstacle */
+	void RemoveFromConstructionProgress(UStaticMeshComponent* PartVisual);
 
 	UObstacleMovementComponent* GetObstacleMovementComponent() { return MovementComponent; };
 
@@ -117,9 +117,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = Components)
 	UObstacleMovementComponent* MovementComponent;
-
-	float TotalConstructionTime;
-	float ConstructionTimer;
 
 	/** Index of the obstacle. Caution: This index only has the valid index on the server! */
 	int32 ObstacleIndex;

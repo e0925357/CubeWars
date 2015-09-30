@@ -23,8 +23,6 @@ ADestroyableObstacle::ADestroyableObstacle()
 	, ExplosionForce(5000.0f)
 	, MaxHealth(26.0f)
 	, Health(MaxHealth)
-	, TotalConstructionTime(MaxConstructionTime)
-	, ConstructionTimer(0.0f)
 	, FinalPartMaterial(nullptr)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -56,45 +54,45 @@ ADestroyableObstacle::ADestroyableObstacle()
 		static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(TEXT("/Game/Meshes/SimpleCube.SimpleCube"));
 		if (CubeVisualAsset.Succeeded())
 		{
-			
-			for (int32 i = 0; i < NumPartColumns; ++i)
+			static ConstructorHelpers::FObjectFinder<UMaterialInstance> Material(TEXT("/Game/Materials/QuadraticTransparent.QuadraticTransparent"));
+
+			if (Material.Succeeded())
 			{
-				static ConstructorHelpers::FObjectFinder<UMaterialInstance> Material(TEXT("/Game/Materials/QuadraticTransparent.QuadraticTransparent"));
-
-				if (Material.Succeeded())
+				for (int32 i = 0; i < NumPartColumns; ++i)
 				{
-					const float CENTER_Y = CENTER_WIDTH * (i / static_cast<float>(NumPartColumns - 1)) - CENTER_WIDTH / 2.0f;
+				
+						const float CENTER_Y = CENTER_WIDTH * (i / static_cast<float>(NumPartColumns - 1)) - CENTER_WIDTH / 2.0f;
 
-					TArray<UStaticMeshComponent*> NewVisuals;
+						TArray<UStaticMeshComponent*> NewVisuals;
 
-					NewVisuals.Add(CreateObstaclePart(FVector(X_OFFSET, CENTER_Y, Z_OFFSET), PartScale, CubeVisualAsset.Object, Material.Object, i * NUM_PARTS_PER_COLUMN));
-					NewVisuals.Add(CreateObstaclePart(FVector(X_OFFSET, CENTER_Y, -Z_OFFSET), PartScale, CubeVisualAsset.Object, Material.Object, i * NUM_PARTS_PER_COLUMN + 1));
-					NewVisuals.Add(CreateObstaclePart(FVector(-X_OFFSET, CENTER_Y, -Z_OFFSET), PartScale, CubeVisualAsset.Object, Material.Object, i * NUM_PARTS_PER_COLUMN + 2));
-					NewVisuals.Add(CreateObstaclePart(FVector(-X_OFFSET, CENTER_Y, Z_OFFSET), PartScale, CubeVisualAsset.Object, Material.Object, i * NUM_PARTS_PER_COLUMN + 3));
+						NewVisuals.Add(CreateObstaclePart(FVector(X_OFFSET, CENTER_Y, Z_OFFSET), PartScale, CubeVisualAsset.Object, Material.Object, i * NUM_PARTS_PER_COLUMN));
+						NewVisuals.Add(CreateObstaclePart(FVector(X_OFFSET, CENTER_Y, -Z_OFFSET), PartScale, CubeVisualAsset.Object, Material.Object, i * NUM_PARTS_PER_COLUMN + 1));
+						NewVisuals.Add(CreateObstaclePart(FVector(-X_OFFSET, CENTER_Y, -Z_OFFSET), PartScale, CubeVisualAsset.Object, Material.Object, i * NUM_PARTS_PER_COLUMN + 2));
+						NewVisuals.Add(CreateObstaclePart(FVector(-X_OFFSET, CENTER_Y, Z_OFFSET), PartScale, CubeVisualAsset.Object, Material.Object, i * NUM_PARTS_PER_COLUMN + 3));
 
-					FRandomStream RandStream;
-					RandStream.GenerateNewSeed();
+						FRandomStream RandStream;
+						RandStream.GenerateNewSeed();
 
-					// First determine the parts that can fall off
-					int32 Index = RandStream.RandRange(0, 3);
-					FallOffParts.Add(NewVisuals[Index]);
-					NewVisuals.RemoveAt(Index);
+						// First determine the parts that can fall off
+						int32 Index = RandStream.RandRange(0, 3);
+						FallOffParts.Add(NewVisuals[Index]);
+						NewVisuals.RemoveAt(Index);
 
-					Index = RandStream.RandRange(0, 2);
-					FallOffParts.Add(NewVisuals[Index]);
-					NewVisuals.RemoveAt(Index);
+						Index = RandStream.RandRange(0, 2);
+						FallOffParts.Add(NewVisuals[Index]);
+						NewVisuals.RemoveAt(Index);
 
-					Index = RandStream.RandRange(0, 1);
-					FallOffParts.Add(NewVisuals[Index]);
-					NewVisuals.RemoveAt(Index);
+						Index = RandStream.RandRange(0, 1);
+						FallOffParts.Add(NewVisuals[Index]);
+						NewVisuals.RemoveAt(Index);
 
-					// Now the fixed parts
-					FixedParts.Append(NewVisuals);
+						// Now the fixed parts
+						FixedParts.Append(NewVisuals);
 				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Materials/QuadraticTransparent.QuadraticTransparent'!"));
-				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Materials/QuadraticTransparent.QuadraticTransparent'!"));
 			}
 		}
 		else
@@ -124,8 +122,6 @@ void ADestroyableObstacle::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TotalConstructionTime = MaxConstructionTime;
-
 	// Initialize the construction structs for the parts of the obstacle
 	FRandomStream Rand;
 	for (int32 i = 0; i < ConstructionProgresses.Num(); ++i)
@@ -144,9 +140,6 @@ void ADestroyableObstacle::BeginPlay()
 // Called every frame
 void ADestroyableObstacle::Tick( float DeltaTime )
 {
-	if(!this->IsValidLowLevel() || IsActorBeingDestroyed())
-		return;
-
 	Super::Tick( DeltaTime );
 
 	for (int32 i = 0; i < ConstructionProgresses.Num();)
@@ -165,10 +158,8 @@ void ADestroyableObstacle::Tick( float DeltaTime )
 			NewOpacity = 1.0f;
 			ConstructionProgresses.RemoveAt(i);
 
-			if(FinalPartMaterial && CubeVisual->IsValidLowLevel())
-			{
-				CubeVisual->SetMaterial(0, FinalPartMaterial);
-			}
+			
+			CubeVisual->SetMaterial(0, FinalPartMaterial);
 		}
 		else
 		{
@@ -177,9 +168,6 @@ void ADestroyableObstacle::Tick( float DeltaTime )
 			NewOpacity = Delta;
 			++i;
 		}
-
-		if(!CubeVisual->IsValidLowLevel())
-			return;
 
 		CubeVisual->SetRelativeLocation(NewPosition);
 
@@ -204,39 +192,34 @@ float ADestroyableObstacle::TakeDamage(float DamageAmount, struct FDamageEvent c
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	if (IsConstructionInProgress())
+	if (Health <= 0)
 	{
-		if (Health <= 0)
-		{
-			return 0;
-		}
-
-		Health -= DamageAmount;
-
-		float damageTaken;
-
-
-		if (Health <= 0)
-		{
-			// Let all the parts fly around and despawn the actor
-			ClientFallApart();
-
-			Destroy();
-
-			damageTaken = DamageAmount - FMath::Abs(Health);
-		}
-		else
-		{
-			// Let some parts fly around
-			ClientDamageCallback(Health);
-
-			damageTaken = DamageAmount;
-		}
-
-		return damageTaken;
+		return 0;
 	}
 
-	return 0.0f;
+	Health -= DamageAmount;
+
+	float damageTaken;
+
+
+	if (Health <= 0)
+	{
+		// Let all the parts fly around and despawn the actor
+		ClientFallApart();
+
+		Destroy();
+
+		damageTaken = DamageAmount - FMath::Abs(Health);
+	}
+	else
+	{
+		// Let some parts fly around
+		ClientDamageCallback(Health);
+
+		damageTaken = DamageAmount;
+	}
+
+	return damageTaken;
 }
 
 UStaticMeshComponent* ADestroyableObstacle::CreateObstaclePart(const FVector& RelativePosition, const FVector& Scale, UStaticMesh* StaticMesh, UMaterialInstance* MatInstance, int32 Number)
@@ -304,9 +287,10 @@ void ADestroyableObstacle::ClientFallApart_Implementation()
 
 void ADestroyableObstacle::CreateDebris(UStaticMeshComponent* PartVisual)
 {
-	// Destroy the component...
 	UWorld* const World = GetWorld();
-	PartVisual->DestroyComponent();
+
+	// If the obstacle is under construction --> remove this part from the list
+	RemoveFromConstructionProgress(PartVisual);
 
 	// ...and spawn the actors instead
 	FVector Impulse;
@@ -330,6 +314,24 @@ void ADestroyableObstacle::CreateDebris(UStaticMeshComponent* PartVisual)
 	if (PartVisual->GetMaterial(0)->GetVectorParameterValue("Base Color", PartColor))
 	{
 		debris->SetDebrisColor(PartColor);
+	}
+
+	// Destroy the component...
+	PartVisual->DestroyComponent();
+}
+
+void ADestroyableObstacle::RemoveFromConstructionProgress(UStaticMeshComponent* PartVisual)
+{
+	for (int32 i = 0; i < ConstructionProgresses.Num(); ++i)
+	{
+		PartConstructionProgress& PartProgress = ConstructionProgresses[i];
+
+		if (PartProgress.CubeVisual == PartVisual)
+		{
+			// Remove it from the progress
+			ConstructionProgresses.RemoveAt(i);
+			break;
+		}
 	}
 }
 
