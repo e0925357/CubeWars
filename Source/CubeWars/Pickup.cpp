@@ -87,6 +87,11 @@ APowerUp* APickup::GetPowerUp()
 
 float APickup::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if(Role != ROLE_Authority)
+	{
+		return DamageAmount;
+	}
+
 	if(EventInstigator != nullptr && EventInstigator->IsValidLowLevel() && PowerUp != nullptr && PowerUp->IsValidLowLevel())
 	{
 		APlayerCube* PlayerCube = Cast<APlayerCube>(EventInstigator->GetPawn());

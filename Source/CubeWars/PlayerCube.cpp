@@ -607,7 +607,10 @@ void APlayerCube::SetPowerUp(APowerUp* PowerUp)
 
 	this->PowerUp = PowerUp;
 
-	PowerUp->OnAttach(this);
+	if(Role == ROLE_Authority)
+	{
+		PowerUp->Attach(this);
+	}
 }
 
 void APlayerCube::SetPowerUp_Implementation(int32 GUID)

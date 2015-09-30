@@ -46,7 +46,7 @@ APlayerCube* APowerUp::GetPlayerCube()
 	return PlayerCube;
 }
 
-bool APowerUp::IsAlive()
+bool APowerUp::IsAlive_Implementation()
 {
 	return PlayerCube != nullptr && EffectDuration > 0.0f;
 }
@@ -69,6 +69,11 @@ void APowerUp::OnDetach_Implementation()
 void APowerUp::Detach_Implementation()
 {
 	OnDetach();
+}
+
+void APowerUp::Attach_Implementation(APlayerCube* PlayerCube)
+{
+	OnAttach(PlayerCube);
 }
 
 bool APowerUp::OnShoot_Implementation()

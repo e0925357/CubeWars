@@ -56,10 +56,10 @@ public:
 	APlayerCube* GetPlayerCube();
 
 	/**
-	* @return the player cube that is currently using this powerup.
+	* @return true if the power up should still apply its effect
 	*/
-	UFUNCTION(BlueprintCallable, Category = Powerup)
-	virtual bool IsAlive();
+	UFUNCTION(BlueprintNativeEvent, Category = Powerup)
+	bool IsAlive();
 
 	/**
 	* The PlayerCube will call this function once per tick.
@@ -79,6 +79,12 @@ public:
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = Powerup)
 	void OnDetach();
+
+	/**
+	* This method calls OnAttach() on every involved machine.
+	*/
+	UFUNCTION(NetMulticast, reliable)
+	void Attach(APlayerCube* PlayerCube);
 
 	/**
 	* This method calls OnDetach() on every involved machine.
