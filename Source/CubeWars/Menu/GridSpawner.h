@@ -53,6 +53,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Visual)
 	float Dimension;
 
+	UPROPERTY(EditDefaultsOnly, Category = Visual)
+	float VerticalDimension;
+
 private:
 	TArray<GridCubeSpawner> HorizontalSpawners;
 	TArray<GridCubeSpawner> VerticalSpawners;

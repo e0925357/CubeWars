@@ -10,6 +10,7 @@ AGridSpawner::AGridSpawner()
 	, RespawnTimeMax(10.0f)
 	, GridCubeLifetime(15.0f)
 	, Dimension(100.0f)
+	, VerticalDimension(100.0f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -86,7 +87,10 @@ void AGridSpawner::SpawnGridCube(const GridCubeSpawner& Spawner, bool Horizontal
 			}
 		}
 
-		AActor* GridCube = World->SpawnActor<AActor>(GridCubeClass, Spawner.SpawnLocation, SpawnRotation);
+		FVector SpawnPosition = Spawner.SpawnLocation;
+		SpawnPosition.Z += RandStream.FRandRange(-VerticalDimension, VerticalDimension);
+
+		AActor* GridCube = World->SpawnActor<AActor>(GridCubeClass, SpawnPosition, SpawnRotation);
 		GridCube->SetLifeSpan(GridCubeLifetime);
 	}
 }
