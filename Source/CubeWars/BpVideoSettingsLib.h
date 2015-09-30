@@ -47,6 +47,14 @@ public:
 		static bool SetVideoQualitySettings(const int32 AntiAliasing = 3, const int32 Effects = 3, const int32 PostProcess = 3,
 		const int32 Resolution = 100, const int32 Shadow = 3, const int32 Texture = 3, const int32 ViewDistance = 3);
 
+	//Gets the current sound settings
+	UFUNCTION(BlueprintCallable, Category = "Sound Settings")
+	static bool GetSoundSettings(float& MasterVolume, float& EffectsVolume, float& MusicVolume, float& VoiceVolume);
+
+	//Sets the current sound settings (not applied nor saved yet)
+	UFUNCTION(BlueprintCallable, Category = "Sound Settings")
+	static bool SetSoundSettings(const float MasterVolume = 1.0f, const float EffectsVolume = 0.75f, const float MusicVolume = 0.5f, const float VoiceVolume = 1.0f);
+
 	// Check whether or not we have vertical sync enabled
 	UFUNCTION(BlueprintPure, Category = "Video Settings")
 		static bool IsVSyncEnabled();
@@ -66,4 +74,7 @@ public:
 private:
 	// Try to get the GameUserSettings object from the engine
 	static UGameUserSettings* GetGameUserSettings();
+
+	// Try to get the CWGameUserSettings object from the engine
+	static class UCWGameUserSettings* GetCWGameUserSettings();
 };

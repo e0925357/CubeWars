@@ -2,6 +2,7 @@
 
 #include "CubeWars.h"
 #include "BpVideoSettingsLib.h"
+#include "CWGameUserSettings.h"
 
 
 // Get a list of screen resolutions supported by video adapter
@@ -166,8 +167,7 @@ bool UBpVideoSettingsLib::SaveVideoModeAndQuality()
 	}
 
 	Settings->ConfirmVideoMode();
-	Settings->ApplyNonResolutionSettings();
-	Settings->SaveSettings();
+	Settings->ApplySettings(false);
 	return true;
 }
 
@@ -185,6 +185,41 @@ bool UBpVideoSettingsLib::RevertVideoMode()
 	return true;
 }
 
+bool UBpVideoSettingsLib::GetSoundSettings(float& MasterVolume, float& EffectsVolume, float& MusicVolume, float& VoiceVolume)
+{
+	UCWGameUserSettings* Settings = GetCWGameUserSettings();
+
+	if(Settings == nullptr)
+	{
+		return false;
+	}
+
+	MasterVolume = Settings->GetMasterSoundVolume();
+	EffectsVolume = Settings->GetEffectsSoundVolume();
+	MusicVolume = Settings->GetMusicSoundVolume();
+	VoiceVolume = Settings->GetVoiceSoundVolume();
+
+	return true;
+}
+
+
+bool UBpVideoSettingsLib::SetSoundSettings(const float MasterVolume/* = 1.0f*/, const float EffectsVolume/* = 0.75f*/, const float MusicVolume/* = 0.5f*/, const float VoiceVolume/* = 1.0f*/)
+{
+	UCWGameUserSettings* Settings = GetCWGameUserSettings();
+
+	if(Settings == nullptr)
+	{
+		return false;
+	}
+
+	Settings->SetMasterSoundVolume(MasterVolume);
+	Settings->SetEffectsSoundVolume(EffectsVolume);
+	Settings->SetMusicSoundVolume(MusicVolume);
+	Settings->SetVoiceSoundVolume(VoiceVolume);
+
+	return true;
+}
+
 
 //---- PRIVATE METHODS -------------------------------------------------------------------------------
 
@@ -197,5 +232,17 @@ UGameUserSettings* UBpVideoSettingsLib::GetGameUserSettings()
 	}
 
 	return nullptr;
+}
+
+UCWGameUserSettings* UBpVideoSettingsLib::GetCWGameUserSettings()
+{
+	UGameUserSettings* Settings = GetGameUserSettings();
+
+	if(Settings == nullptr)
+	{
+		return nullptr;
+	}
+
+	return Cast<UCWGameUserSettings>(Settings);
 }
 
