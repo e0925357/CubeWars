@@ -56,11 +56,12 @@ ADestroyableObstacle::ADestroyableObstacle()
 		static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeVisualAsset(TEXT("/Game/Meshes/SimpleCube.SimpleCube"));
 		if (CubeVisualAsset.Succeeded())
 		{
-			static ConstructorHelpers::FObjectFinder<UMaterialInstance> Material(TEXT("/Game/Materials/QuadraticTransparent.QuadraticTransparent"));
-
-			if (Material.Succeeded())
+			
+			for (int32 i = 0; i < NumPartColumns; ++i)
 			{
-				for (int32 i = 0; i < NumPartColumns; ++i)
+				static ConstructorHelpers::FObjectFinder<UMaterialInstance> Material(TEXT("/Game/Materials/QuadraticTransparent.QuadraticTransparent"));
+
+				if (Material.Succeeded())
 				{
 					const float CENTER_Y = CENTER_WIDTH * (i / static_cast<float>(NumPartColumns - 1)) - CENTER_WIDTH / 2.0f;
 
@@ -90,10 +91,10 @@ ADestroyableObstacle::ADestroyableObstacle()
 					// Now the fixed parts
 					FixedParts.Append(NewVisuals);
 				}
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Materials/QuadraticTransparent.QuadraticTransparent'!"));
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Cannot find '/Game/Materials/QuadraticTransparent.QuadraticTransparent'!"));
+				}
 			}
 		}
 		else
