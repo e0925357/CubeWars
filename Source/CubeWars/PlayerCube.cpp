@@ -68,6 +68,7 @@ APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f), ShootTimer(0.0f), 
 	SpringArm->TargetArmLength = 400.0f;
 	SpringArm->bEnableCameraLag = false;
 	SpringArm->CameraLagSpeed = 3.0f;
+	SpringArm->bDoCollisionTest = false;
 
 	// Create a camera and attach to our spring arm
 	UCameraComponent* Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ActualCamera"));
