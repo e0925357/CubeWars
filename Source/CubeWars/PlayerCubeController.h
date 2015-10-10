@@ -13,6 +13,7 @@ class CUBEWARS_API APlayerCubeController : public APlayerController
 {
 	GENERATED_BODY()
 public:
+	APlayerCubeController();
 
 	void setCanShoot(bool bCanShoot);
 
@@ -65,8 +66,11 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnRequestRestart();
 
+	bool IsNameInitialized() const;
+
 private:
 	bool bCanShoot;
+	bool bNameInitialized;
 	
 	UPROPERTY()
 	FString playerName;

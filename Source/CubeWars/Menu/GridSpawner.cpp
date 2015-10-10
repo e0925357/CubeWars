@@ -48,7 +48,7 @@ void AGridSpawner::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
-	for (int32 i = 0; i < NumCubesPerSide; ++i)
+	for(int32 i = 0; i < HorizontalSpawners.Num(); ++i)
 	{
 		UpdateSpawner(HorizontalSpawners[i], true, DeltaTime);
 		UpdateSpawner(VerticalSpawners[i], false, DeltaTime);

@@ -6,6 +6,11 @@
 #include "CubeWarsGameMode.h"
 
 
+APlayerCubeController::APlayerCubeController() : bNameInitialized(false)
+{
+
+}
+
 void APlayerCubeController::setCanShoot(bool bCanShoot)
 {
 	this->bCanShoot = bCanShoot;
@@ -75,6 +80,7 @@ void APlayerCubeController::MatchRestarted_Implementation()
 void APlayerCubeController::setPlayerNameBP(const FString& name)
 {
 	playerName = name;
+	bNameInitialized = true;
 
 	setPlayerNameServer(name);
 }
@@ -82,6 +88,7 @@ void APlayerCubeController::setPlayerNameBP(const FString& name)
 void APlayerCubeController::setPlayerNameServer_Implementation(const FString& name)
 {
 	playerName = name;
+	bNameInitialized = true;
 }
 
 bool APlayerCubeController::setPlayerNameServer_Validate(const FString& name)
@@ -97,5 +104,10 @@ const FString& APlayerCubeController::getPlayerName()
 void APlayerCubeController::ClientRequestRestart_Implementation()
 {
 	OnRequestRestart();
+}
+
+bool APlayerCubeController::IsNameInitialized() const
+{
+	return bNameInitialized;
 }
 

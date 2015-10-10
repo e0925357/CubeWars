@@ -22,6 +22,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Stats)
 	const FString& GetPlayerName();
 
+	UPROPERTY(BlueprintReadWrite, Category = Music)
+	float MenuMusicPlaybackTime;
+
 private:
 	FString PlayerName;
 };
