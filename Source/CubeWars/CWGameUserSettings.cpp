@@ -3,7 +3,20 @@
 #include "CubeWars.h"
 #include "AudioDevice.h"
 #include "CWGameUserSettings.h"
+#include "CubeGameInstance.h"
 
+namespace
+{
+	const float DEFAULT_SENSITIVITY_SCALE = 1.0f;
+}
+
+UCWGameUserSettings::UCWGameUserSettings()
+	: UGameUserSettings()
+	, MinPlayerTurnSensitivityScale(0.5f)
+	, MaxPlayerTurnSensitivityScale(3.0f)
+	, TurnSensitivity((DEFAULT_SENSITIVITY_SCALE - MinPlayerTurnSensitivityScale) / (MaxPlayerTurnSensitivityScale - MinPlayerTurnSensitivityScale)) // Calculate the player turn sensitivity so that we get an initial scale of DEFAULT_SENSITIVITY_SCALE
+{
+}
 
 void UCWGameUserSettings::LoadSettings(bool bForceReload/* = false*/)
 {
@@ -61,7 +74,7 @@ void UCWGameUserSettings::ApplySoundSettings()
 	}
 }
 
-float UCWGameUserSettings::GetMasterSoundVolume()
+float UCWGameUserSettings::GetMasterSoundVolume() const
 {
 	return MasterSoundVolume;
 }
@@ -70,7 +83,7 @@ void UCWGameUserSettings::SetMasterSoundVolume(float Volume)
 	MasterSoundVolume = Volume;
 }
 
-float UCWGameUserSettings::GetEffectsSoundVolume()
+float UCWGameUserSettings::GetEffectsSoundVolume() const
 {
 	return EffectsSoundVolume;
 }
@@ -79,7 +92,7 @@ void UCWGameUserSettings::SetEffectsSoundVolume(float Volume)
 	EffectsSoundVolume = Volume;
 }
 
-float UCWGameUserSettings::GetMusicSoundVolume()
+float UCWGameUserSettings::GetMusicSoundVolume() const
 {
 	return MusicSoundVolume;
 }
@@ -88,7 +101,7 @@ void UCWGameUserSettings::SetMusicSoundVolume(float Volume)
 	MusicSoundVolume = Volume;
 }
 
-float UCWGameUserSettings::GetVoiceSoundVolume()
+float UCWGameUserSettings::GetVoiceSoundVolume() const
 {
 	return VoiceSoundVolume;
 }
@@ -97,3 +110,16 @@ void UCWGameUserSettings::SetVoiceSoundVolume(float Volume)
 	VoiceSoundVolume = Volume;
 }
 
+float UCWGameUserSettings::GetTurnSensitivity() const
+{
+	return TurnSensitivity;
+}
+void UCWGameUserSettings::SetTurnSensitivity(float NewTurnSensitivity)
+{
+	TurnSensitivity = NewTurnSensitivity;
+}
+
+float UCWGameUserSettings::GetPlayerTurnSensitivityScale() const
+{
+	return MinPlayerTurnSensitivityScale + (MaxPlayerTurnSensitivityScale - MinPlayerTurnSensitivityScale) * TurnSensitivity;
+}

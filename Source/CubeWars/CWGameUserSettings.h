@@ -13,6 +13,8 @@ class CUBEWARS_API UCWGameUserSettings : public UGameUserSettings
 	GENERATED_BODY()
 	
 public:
+	UCWGameUserSettings();
+
 	/** Loads the user settings from persistent storage */
 	virtual void LoadSettings(bool bForceReload = false) override;
 
@@ -21,17 +23,24 @@ public:
 
 	void ApplySoundSettings();
 
-	float GetMasterSoundVolume();
+	float GetMasterSoundVolume() const;
 	void SetMasterSoundVolume(float Volume);
 
-	float GetEffectsSoundVolume();
+	float GetEffectsSoundVolume() const;
 	void SetEffectsSoundVolume(float Volume);
 
-	float GetMusicSoundVolume();
+	float GetMusicSoundVolume() const;
 	void SetMusicSoundVolume(float Volume);
 
-	float GetVoiceSoundVolume();
+	float GetVoiceSoundVolume() const;
 	void SetVoiceSoundVolume(float Volume);
+
+	/** The value of the sensitivity slider in the options menu. Ranges from 0.0f to 1.0f */
+	float GetTurnSensitivity() const;
+	void SetTurnSensitivity(float NewTurnSensitivity);
+
+	/** The PlayerTurnScale is the scale which is to be applied to the turning speed of the player */
+	float GetPlayerTurnSensitivityScale() const;
 	
 protected:
 
@@ -46,4 +55,10 @@ protected:
 
 	UPROPERTY(config)
 	float VoiceSoundVolume;
+
+	float MinPlayerTurnSensitivityScale;
+	float MaxPlayerTurnSensitivityScale;
+
+	UPROPERTY(config)
+	float TurnSensitivity;
 };

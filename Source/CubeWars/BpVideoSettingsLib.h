@@ -20,31 +20,31 @@ class CUBEWARS_API UBpVideoSettingsLib : public UBlueprintFunctionLibrary
 public:
 	// Get a list of screen resolutions supported on this machine
 	UFUNCTION(BlueprintPure, Category = "Video Settings")
-		static bool GetSupportedScreenResolutions(TArray<FString>& Resolutions);
+	static bool GetSupportedScreenResolutions(TArray<FString>& Resolutions);
 
 	// Get currently set screen resolution
 	UFUNCTION(BlueprintPure, Category = "Video Settings")
-		static FString GetScreenResolution();
+	static FString GetScreenResolution();
 
 	// Check whether or not we are currently running in fullscreen mode
 	UFUNCTION(BlueprintPure, Category = "Video Settings")
-		static bool IsInFullscreen();
+	static bool IsInFullscreen();
 
 	// Set the desired screen resolution (does not change it yet)
 	UFUNCTION(BlueprintCallable, Category = "Video Settings")
-		static bool SetScreenResolution(const int32 Width, const int32 Height, const bool Fullscreen);
+	static bool SetScreenResolution(const int32 Width, const int32 Height, const bool Fullscreen);
 
 	// Change the current screen resolution
 	UFUNCTION(BlueprintCallable, Category = "Video Settings")
-		static bool ChangeScreenResolution(const int32 Width, const int32 Height, const bool Fullscreen);
+	static bool ChangeScreenResolution(const int32 Width, const int32 Height, const bool Fullscreen);
 
 	// Get the current video quality settings
 	UFUNCTION(BlueprintCallable, Category = "Video Settings")
-		static bool GetVideoQualitySettings(int32& AntiAliasing, int32& Effects, int32& PostProcess, int32& Resolution, int32& Shadow, int32& Texture, int32& ViewDistance);
+	static bool GetVideoQualitySettings(int32& AntiAliasing, int32& Effects, int32& PostProcess, int32& Resolution, int32& Shadow, int32& Texture, int32& ViewDistance);
 
 	// Set the quality settings (not applied nor saved yet)
 	UFUNCTION(BlueprintCallable, Category = "Video Settings")
-		static bool SetVideoQualitySettings(const int32 AntiAliasing = 3, const int32 Effects = 3, const int32 PostProcess = 3,
+	static bool SetVideoQualitySettings(const int32 AntiAliasing = 3, const int32 Effects = 3, const int32 PostProcess = 3,
 		const int32 Resolution = 100, const int32 Shadow = 3, const int32 Texture = 3, const int32 ViewDistance = 3);
 
 	//Gets the current sound settings
@@ -55,21 +55,27 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Sound Settings")
 	static bool SetSoundSettings(const float MasterVolume = 1.0f, const float EffectsVolume = 0.75f, const float MusicVolume = 0.5f, const float VoiceVolume = 1.0f);
 
+	UFUNCTION(BlueprintCallable, Category = "Gameplay Settings")
+	static bool GetGameplaySettings(float& TurnSensitivity);
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay Settings")
+	static bool SetGameplaySettings(const float TurnSensitivity = 0.2f);
+
 	// Check whether or not we have vertical sync enabled
 	UFUNCTION(BlueprintPure, Category = "Video Settings")
-		static bool IsVSyncEnabled();
+	static bool IsVSyncEnabled();
 
 	// Set the vertical sync flag
 	UFUNCTION(BlueprintCallable, Category = "Video Settings")
-		static bool SetVSyncEnabled(const bool VSync);
+	static bool SetVSyncEnabled(const bool VSync);
 
 	// Confirm and save current video mode (resolution and fullscreen/windowed) as well as quality settings
 	UFUNCTION(BlueprintCallable, Category = "Video Settings")
-		static bool SaveVideoModeAndQuality();
+	static bool SaveVideoModeAndQuality();
 
 	// Revert to original video settings
 	UFUNCTION(BlueprintCallable, Category = "Video Settings")
-		static bool RevertVideoMode();
+	static bool RevertVideoMode();
 
 private:
 	// Try to get the GameUserSettings object from the engine

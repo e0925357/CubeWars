@@ -221,6 +221,36 @@ bool UBpVideoSettingsLib::SetSoundSettings(const float MasterVolume/* = 1.0f*/, 
 }
 
 
+bool UBpVideoSettingsLib::GetGameplaySettings(float& TurnSensitivity)
+{
+	UCWGameUserSettings* Settings = GetCWGameUserSettings();
+
+	if (Settings == nullptr)
+	{
+		return false;
+	}
+
+	TurnSensitivity = Settings->GetTurnSensitivity();
+
+	return true;
+}
+
+
+bool UBpVideoSettingsLib::SetGameplaySettings(const float TurnSensitivity/* = 0.2f*/)
+{
+	UCWGameUserSettings* Settings = GetCWGameUserSettings();
+
+	if (Settings == nullptr)
+	{
+		return false;
+	}
+
+	Settings->SetTurnSensitivity(TurnSensitivity);
+
+	return true;
+}
+
+
 //---- PRIVATE METHODS -------------------------------------------------------------------------------
 
 // Try to get the GameUserSettings object from the engine

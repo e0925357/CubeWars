@@ -160,6 +160,7 @@ protected:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = Components)
 	class UPlayerCubeMovementComponent* CubeMovement;
 
+	float turnSensitivityScale;
 	float targetHeight;
 	uint8 raisingState;
 

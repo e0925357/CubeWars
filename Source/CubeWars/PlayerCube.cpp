@@ -11,6 +11,7 @@
 #include "CubeWarsPlayerState.h"
 #include "OrbitingPawn.h"
 #include "PowerUp.h"
+#include "CWGameUserSettings.h"
 
 namespace
 {
@@ -23,7 +24,15 @@ namespace
 }
 
 // Sets default values
-APlayerCube::APlayerCube() : TurnRate(20.0f), Health(100.0f), ShootTimer(0.0f), ShootDelay(0.7f), IsShooting(false), raisingState(0), targetHeight(0)
+APlayerCube::APlayerCube()
+	: TurnRate(20.0f)
+	, Health(100.0f)
+	, ShootTimer(0.0f)
+	, ShootDelay(0.7f)
+	, IsShooting(false)
+	, turnSensitivityScale(1.0f)
+	, targetHeight(0)
+	, raisingState(0)
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -110,6 +119,14 @@ void APlayerCube::BeginPlay()
 	Super::BeginPlay();
 	
 	InitinalRotation = GetActorRotation();
+
+	// Set the TurnSensitivityScale
+	UGameInstance* gameInstance = GetWorld()->GetGameInstance();
+	UCWGameUserSettings* userSettings = Cast<UCWGameUserSettings>(GEngine->GetGameUserSettings());
+	if (userSettings)
+	{
+		turnSensitivityScale = userSettings->GetPlayerTurnSensitivityScale();
+	}
 }
 
 // Called every frame
@@ -408,7 +425,7 @@ void APlayerCube::Turn(float value)
 {
 	if(value != 0)
 	{
-		TurnServer(value);
+		TurnServer(value * turnSensitivityScale);
 	}
 }
 
