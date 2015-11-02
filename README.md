@@ -1,7 +1,7 @@
 # CubeWars
 A little game to test the network abilities of the Unreal Engine.
 
-![CubeWars Screenshot 01](https://raw.githubusercontent.com/e0925357/CubeWars/master/Screenshots/Screenshot_Beta0.1.0_01.png)
+![CubeWars Screenshot 01](https://raw.githubusercontent.com/e0925357/CubeWars/master/Screenshots/Screenshot_1.0.0_01.jpg)
 
 ## Where can I download it?
 If you want to download the latest release, go to the [release-page](https://github.com/e0925357/CubeWars/releases)!
@@ -33,6 +33,6 @@ This game can only be played with 2 players. Each player takes control over a cu
   * Player gets a shield that will absorb a specific amount of damage
 
 ### Screenshots
-![CubeWars Screenshot 02](https://raw.githubusercontent.com/e0925357/CubeWars/master/Screenshots/Screenshot_Beta0.1.0_02.png)
-![CubeWars Screenshot 03](https://raw.githubusercontent.com/e0925357/CubeWars/master/Screenshots/Screenshot_Beta0.1.0_03.png)
-![CubeWars Screenshot 04](https://raw.githubusercontent.com/e0925357/CubeWars/master/Screenshots/Screenshot_Beta0.1.0_04.png)
+![CubeWars Screenshot 02](https://raw.githubusercontent.com/e0925357/CubeWars/master/Screenshots/Screenshot_1.0.0_02.jpg)
+![CubeWars Screenshot 03](https://raw.githubusercontent.com/e0925357/CubeWars/master/Screenshots/Screenshot_1.0.0_03.jpg)
+![CubeWars Screenshot 04](https://raw.githubusercontent.com/e0925357/CubeWars/master/Screenshots/Screenshot_1.0.0_04.jpg)
