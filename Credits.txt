@@ -7,21 +7,31 @@ Author: ElevatorProductions
 Link: https://www.freesound.org/people/ElevatorProductions/sounds/69944/
 
 File: BoxCat_Games_-_10_-_Epic_Song.wav
-Author: BoxCat Games
 Link: http://freemusicarchive.org/music/BoxCat_Games/Nameless_the_Hackers_RPG_Soundtrack/BoxCat_Games_-_Nameless-_the_Hackers_RPG_Soundtrack_-_10_Epic_Song
+"Epic Song" BoxCat Games
+Licensed under Creative Commons: By Attribution 3.0
+http://creativecommons.org/licenses/by/3.0/
 
 File: Cephalopod.wav
-Author: Kevin MacLeod
 Link: http://incompetech.com/music/royalty-free/index.html?isrc=USUAN1200081
+"Cephalopod" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 3.0
+http://creativecommons.org/licenses/by/3.0/
 
 File: Chronox_-_02_-_Final_Flight.wav
-Author: Chronox
 Link: http://freemusicarchive.org/music/Chronox_2/Voyager/Chronox_-_04_-_Final_Flight
+"Final Flight" Chronox
+Licensed under Creative Commons: By Attribution 4.0
+http://creativecommons.org/licenses/by/4.0/
 
 File: Exit the Premises.wav
-Author: Kevin MacLeod
 Link: http://incompetech.com/music/royalty-free/index.html?isrc=USUAN1500029
+"Exit the Premises" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 3.0
+http://creativecommons.org/licenses/by/3.0/
 
 File: Tours_-_01_-_Enthusiast.wav
-Author: Tours
 Link: http://freemusicarchive.org/music/Tours/Enthusiast/Tours_-_Enthusiast
+"Enthusiast" Tours
+Licensed under Creative Commons: By Attribution 3.0
+http://creativecommons.org/licenses/by/3.0/
