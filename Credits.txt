@@ -1,7 +1,3 @@
-File: Dr_Wylie_-_02_-_Its_Ok_We_Have_Chemistry.wav
-Author: Dr. Wylie
-Link: http://freemusicarchive.org/music/Dr_Wylie/The_Trillmont_Playbook/02_2_1366
-
 File: 69852__meutecee__brasshit-12.wav
 Author: Meutecee
 Link: https://www.freesound.org/people/Meutecee/sounds/69852/
@@ -16,20 +12,16 @@ Link: http://freemusicarchive.org/music/BoxCat_Games/Nameless_the_Hackers_RPG_So
 
 File: Cephalopod.wav
 Author: Kevin MacLeod
-Link: http://incompetech.com/music/royalty-free/
+Link: http://incompetech.com/music/royalty-free/index.html?isrc=USUAN1200081
 
 File: Chronox_-_02_-_Final_Flight.wav
 Author: Chronox
 Link: http://freemusicarchive.org/music/Chronox_2/Voyager/Chronox_-_04_-_Final_Flight
 
-File: Dr_Wylie_-_03_-_Keep_In_Style.wav
-Author: Dr. Wylie
-Link: http://freemusicarchive.org/music/Dr_Wylie/The_Trillmont_Playbook/03_Keep_In_Style
-
 File: Exit the Premises.wav
 Author: Kevin MacLeod
-Link: http://incompetech.com/music/royalty-free/
+Link: http://incompetech.com/music/royalty-free/index.html?isrc=USUAN1500029
 
-File: Foniqz_-_03_-_Spectrum_Subdiffusion_Mix.wav
-Author: Foniqz
-Link: http://freemusicarchive.org/music/Foniqz/D2_EP/Spectrum_Subdiffusion_Mix
+File: Tours_-_01_-_Enthusiast.wav
+Author: Tours
+Link: http://freemusicarchive.org/music/Tours/Enthusiast/Tours_-_Enthusiast
