@@ -11,45 +11,18 @@ namespace
 		UConsole* ViewportConsole = (GEngine->GameViewport != nullptr) ? GEngine->GameViewport->ViewportConsole : nullptr;
 		return ViewportConsole;
 	}
-
-	/** Helper function to perform the client travel code */
-	bool ClientTravel(const FString& URLString, UObject* WorldContextObject)
-	{
-		UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject);
-		check(World);
-		UEngine* const Engine = World->GetGameInstance()->GetEngine();
-		check(Engine);
-		FWorldContext* WorldContext = Engine->GetWorldContextFromWorld(World);
-		check(WorldContext);
-
-		FURL TestURL(&WorldContext->LastURL, *URLString, TRAVEL_Absolute);
-		if (TestURL.IsLocalInternal())
-		{
-			// make sure the file exists if we are opening a local file
-			if (!Engine->MakeSureMapNameIsValid(TestURL.Map))
-			{
-				FConsoleOutputDevice StrOut(GetConsole());
-				StrOut.Logf(TEXT("ERROR: The map '%s' does not exist."), *TestURL.Map);
-				return false;
-			}
-		}
-
-		Engine->SetClientTravel(World, *URLString, TRAVEL_Absolute);
-
-		return true;
-	}
 }
 
 bool UBpNetworkLevelTravelLib::OpenLocalServer(const FString& LevelName, UObject* WorldContextObject)
 {
-	FString URLString = LevelName + FString("?Listen");
-
-	return ClientTravel(URLString, WorldContextObject);
+	UGameplayStatics::OpenLevel(WorldContextObject, FName(*LevelName), true, "Listen");
+	return true;
 }
 
 bool UBpNetworkLevelTravelLib::ConnectToServer(const FString& IpAddress, UObject* WorldContextObject)
 {
-	return ClientTravel(IpAddress, WorldContextObject);
+	UGameplayStatics::OpenLevel(WorldContextObject, FName(*IpAddress), true);
+	return true;
 }
 
 bool UBpNetworkLevelTravelLib::OpenLevelOnAllClients(FString LevelName, UObject* WorldContextObject)
