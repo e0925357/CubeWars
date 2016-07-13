@@ -72,7 +72,7 @@ APlayerCube::APlayerCube()
 
 	// Use a spring arm to give the camera smooth, natural-feeling motion.
 	USpringArmComponent* SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraAttachmentArm"));
-	SpringArm->AttachTo(RootComponent);
+	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	SpringArm->RelativeRotation = FRotator(-20.f, 0.f, 0.f);
 	SpringArm->TargetArmLength = 400.0f;
 	SpringArm->bEnableCameraLag = false;
@@ -81,7 +81,7 @@ APlayerCube::APlayerCube()
 
 	// Create a camera and attach to our spring arm
 	UCameraComponent* Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("ActualCamera"));
-	Camera->AttachTo(SpringArm, USpringArmComponent::SocketName);
+	Camera->AttachToComponent(SpringArm, FAttachmentTransformRules::KeepRelativeTransform, USpringArmComponent::SocketName);
 	Camera->PostProcessSettings.MotionBlurAmount = 0.5f;
 	Camera->PostProcessSettings.MotionBlurMax = 0.5f;
 	Camera->PostProcessSettings.bOverride_MotionBlurAmount = true;
@@ -572,7 +572,7 @@ void APlayerCube::createDeathEffect(const FVector& location, const FRotator& rot
 	deathEffect->SetActive(false);
 	deathEffect->SetRelativeLocation(location);
 	deathEffect->SetRelativeRotation(rotation);
-	deathEffect->AttachTo(GetRootComponent());
+	deathEffect->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 }
 
 void APlayerCube::OnDeath_Implementation(float explosionForce)

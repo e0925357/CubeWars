@@ -72,7 +72,7 @@ void AProjectile::Tick( float DeltaTime )
 
 }
 
-void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if(OtherActor != nullptr && Role == ROLE_Authority)
 	{
